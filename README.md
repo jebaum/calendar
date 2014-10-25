@@ -1,6 +1,11 @@
 UCLA CS130 Calendaring + Task Management Application
 Fall 2014
 
+Usage
+=====
+- Requires apache-ant and apache-ivy for building and fetching dependencies
+- Run `ant bootstrap` one time only to download ivy and other needed jars
+- Ant `build`, `run`, and `clean` targets do exactly what they sound like
 
 Components
 ==========

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="build" name="YAMLCal">
+    <property name="ivy-version" value="2.3.0" />
+    <property name="debuglevel" value="source,lines,vars" />
+    <property name="main-class" value="cs130.calendar.Test" />
+    <property name="build-dir" location="build" />
+    <property name="jar-dir" location="${build-dir}/jar" />
+    <property name="lib-dir" location="lib" />
+    <property name="src-dir" location="src" />
+
+    <!-- environment setup/bootstrapping -->
+    <mkdir dir="${lib-dir}" />
+    <path id="ivy.lib.path">
+        <fileset dir="${lib-dir}" includes="*.jar" />
+    </path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+
+    <mkdir dir="${lib-dir}" /> <!-- taskdef fails if the directory isn't present -->
+    <taskdef name="ivy-retrieve" classname="org.apache.ivy.ant.IvyRetrieve" />
+
+    <target name="bootstrap">
+        <get dest="${lib-dir}/ivy-${ivy-version}.jar" src="http://central.maven.org/maven2/org/apache/ivy/ivy/${ivy-version}/ivy-${ivy-version}.jar" />
+        <antcall target="resolve" />
+    </target>
+
+    <target name="resolve">
+        <ivy:retrieve pattern="${lib-dir}/[artifact].[ext]" />
+    </target>
+
+    <target name="init">
+        <mkdir dir="${lib-dir}" />
+        <mkdir dir="${build-dir}" />
+    </target>
+    <!-- end environment setup -->
+
+    <!-- include external libraries -->
+    <path id="classpath">
+        <fileset dir="${lib-dir}" includes="**/*.jar" />
+    </path>
+
+    <!-- MAIN SET OF TARGETS -->
+    <target name="clean">
+        <delete dir="${build-dir}" />
+    </target>
+
+    <target name="build" depends="init">
+        <javac debug="true" debuglevel="${debuglevel}" srcdir="${src-dir}" destdir="${build-dir}" classpathref="classpath" includeantruntime="false" />
+    </target>
+
+    <target name="run" depends="build">
+        <echo message="Running ${main-class}:" />
+        <java fork="true" classname="${main-class}">
+            <classpath>
+                <path refid="classpath" />
+                <path location="${build-dir}" />
+                <!-- <path location="${jar-dir}/${ant.project.name}.jar" /> -->
+            </classpath>
+        </java>
+    </target>
+
+    <target name="jar" depends="build">
+        <mkdir dir="${jar-dir}" />
+        <jar destfile="${jar-dir}/${ant.project.name}.jar" basedir="${build-dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}" />
+            </manifest>
+        </jar>
+    </target>
+
+</project>

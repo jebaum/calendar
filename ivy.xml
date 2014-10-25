@@ -1,0 +1,12 @@
+<ivy-module version="2.3">
+    <info organisation="cs130.calendar" module="YAMLCal"/>
+    <dependencies>
+        <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.4.3">
+            <artifact name="jackson-core" ext="jar" />
+        </dependency>
+        <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.4.3">
+            <artifact name="jackson-databind" ext="jar" />
+            <exclude name="jackson-annotations" ext="jar" />
+        </dependency>
+    </dependencies>
+</ivy-module>
