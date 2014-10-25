@@ -1,0 +1,16 @@
+By 10/22:
+    Define syntax for calendar file
+    (informal definition, using examples)
+By 10/27:
+    Finish calendar file parser
+By 11/3: 
+    Day View in all UIs
+    Integrate parser with the android app
+By 11/14:
+    Week View in all UIs
+    Support for importing/exporting iCalendar format
+By 12/8:
+    Month View in all UIs
+    Use EBNF to define valid calendar syntax
+By 12/12:
+    Add UI options for creating/editing calendar events

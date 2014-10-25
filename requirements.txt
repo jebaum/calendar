@@ -1,0 +1,67 @@
+Calendar Project Requirements
+
+Features:
+
+    Custom and simple syntax for defining a 'calendar file' of events and tasks
+    Parser for the calendar file providing structured access to the calendar data
+    Compatibility with the iCalendar standard for importing and exporting calendar data to and from other applications
+    Synchronization between various clients: Android, Web, and Terminal
+
+UI FEATURES (across all interfaces)
+    Month view
+    Week view
+    Day view
+    Create/edit events (not needed in terminal UI):
+        Name
+        Location
+        Description
+        Category
+            same idea as having multiple calendars in google calendar, will be used for easy filtering
+        Optional starttime/endtime
+            optional since there can also be all day events
+            stored internally as a datetime
+            will have to decide as part of defining the syntax how the user will be allowed to input these
+        Recurrence
+            certain weekdays, every N days, every N weeks, every N months, every N years....will need to make sure this is powerful enough to cover all use cases, and supported by the syntax
+            e.g. monday wednesday every 2 weeks. can every N weeks support that? combine these?
+        Colors
+            low priority, should be easy to add on later after basic functionality is working
+            maybe associate a color with a category?
+    Tasks
+        Name
+        Notes / details
+        Due datetime
+        Category
+        Subtasks?
+            parent task id
+        Colors
+            same notes as above, low priority
+
+
+
+
+Rough implementation details for getting started:
+
+We'll define a class in Java called 'Event' with all the common data that both
+tasks and events have, and two subclasses 'CalendarEvent' and 'TaskEvent'. The
+parser will read the calendar file, and return all the Events in the file in
+some data structure. Exact API TBD. For instance, it might be worthwhile to be
+able to return tasks and events separately, instead of in one big list of
+Events. Either way, the API will be something roughly like this:
+
+    List<Event> eventList = parser.getTheShit(); // parser does magic
+    for ( Event e : eventList )
+    {
+        DateTime dt = e.getStartTime();
+
+        // encapsulate things that are just strings in their own classes even if it seems a bit annoying
+        // so the parser will have a Title class and a Description class, etc...
+        EventTitle title      = e.getTitle();
+        EventDescription desc = e.getDescription();
+
+        // now that we have all of the info about the event,
+        // do logic to display the event
+        // and keep doing this for every event
+    }
+
+Until we finish a parser that works on some sample input files, we'll be using some dummy data hardcoded into the UI to get started on that end
