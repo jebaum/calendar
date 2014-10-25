@@ -1,12 +1,17 @@
 package yamlcal.type;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 
 public class DueDate {
     private final Date dueDate;
+    @JsonProperty("due_milliseconds")
     private final long milliseconds;
 
-    public DueDate(long dueDate) {
+    @JsonCreator
+    public DueDate(@JsonProperty("due_milliseconds") long dueDate) {
         this.dueDate      = new Date(dueDate);
         this.milliseconds = dueDate;
     }

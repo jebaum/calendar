@@ -1,5 +1,8 @@
 package yamlcal.type;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public class Title {
     private final String title;
 
@@ -18,6 +21,7 @@ public class Title {
         return result.toString();
     }
 
+    @JsonProperty("title")
     public final String valueOf() {
         return this.title;
     }

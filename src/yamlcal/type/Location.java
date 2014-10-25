@@ -1,5 +1,7 @@
 package yamlcal.type;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Location {
     private String location;
 
@@ -18,6 +20,7 @@ public class Location {
         return result.toString();
     }
 
+    @JsonProperty("location")
     public final String valueOf() {
         return this.location;
     }

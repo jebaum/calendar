@@ -1,5 +1,7 @@
 package yamlcal.type;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Category {
     private String category;
 
@@ -18,6 +20,7 @@ public class Category {
         return result.toString();
     }
 
+    @JsonProperty("category")
     public final String valueOf() {
         return this.category;
     }

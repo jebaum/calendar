@@ -1,5 +1,7 @@
 package yamlcal.type;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Description {
     private String description;
 
@@ -18,6 +20,7 @@ public class Description {
         return result.toString();
     }
 
+    @JsonProperty("description")
     public final String valueOf() {
         return this.description;
     }
