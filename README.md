@@ -16,7 +16,7 @@ Components
 
 API
 ===
-- GET /?date_range={start:1414020841, end:1414020841}
+- GET /?date_start=123&date_end=234
 ```
   [
     {
@@ -44,5 +44,5 @@ API
     ...
   ]
 ```
-- PATCH /<hash> 
-- DELETE /<hash> 
+- PATCH /<id>, in memory
+- DELETE /<id>, in memory
