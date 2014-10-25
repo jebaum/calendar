@@ -29,7 +29,8 @@ import yamlcal.type.DueDate;
 
 public class Server {
 
-    // run this file, then `curl 'localhost:8000/?date_start=123&date_end=234'`
+    // TODO: there are a handful of magic values through the current codebase
+    // API endpoints, status codes, jackson annotations, etc. fix this
     public static void main(String[] args) throws JsonProcessingException {
         Title mytitle             = new Title("this is my title");
         Location mylocation       = new Location("here i am");
