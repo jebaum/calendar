@@ -70,8 +70,10 @@ public class Server {
         /*
          * BEGIN ENDPOINTS
          */
-        get("/events/:range", (request, response) -> {
+        get("/date_start/:start/date_end/:end", (request, response) -> {
             String getResponse;
+            System.out.println("Eventually this will return the events in between "
+                            + request.params(":start") + " and " + request.params(":end"));
             try {
                 getResponse = mapper.writeValueAsString(calendarList);
                 response.status(201);
@@ -85,7 +87,7 @@ public class Server {
 
         post("/", (request, response) -> {
             System.out.println("POST:\n" + request.body());
-            return "Thanks for the post!: " + request.body() + "\n";
+            return "Thanks for the post!\n" + request.body() + "\n";
         });
 
     }
