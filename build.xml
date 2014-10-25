@@ -2,7 +2,7 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant" basedir="." default="build" name="YAMLCal">
     <property name="ivy-version" value="2.3.0" />
     <property name="debuglevel" value="source,lines,vars" />
-    <property name="main-class" value="cs130.calendar.Test" />
+    <property name="main-class" value="yamlcal.calendar.Server" />
     <property name="build-dir" location="build" />
     <property name="jar-dir" location="${build-dir}/jar" />
     <property name="lib-dir" location="lib" />
@@ -44,7 +44,7 @@
     </target>
 
     <target name="build" depends="init">
-        <javac debug="true" debuglevel="${debuglevel}" srcdir="${src-dir}" destdir="${build-dir}" classpathref="classpath" includeantruntime="false" />
+        <javac target="1.8" source="1.8" debug="true" debuglevel="${debuglevel}" srcdir="${src-dir}" destdir="${build-dir}" classpathref="classpath" includeantruntime="false" />
     </target>
 
     <target name="run" depends="build">

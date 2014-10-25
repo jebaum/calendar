@@ -1,6 +1,9 @@
 <ivy-module version="2.3">
     <info organisation="cs130.calendar" module="YAMLCal"/>
     <dependencies>
+        <dependency org="com.sparkjava" name="spark-core" rev="2.0.0">
+            <artifact name="spark-core" ext="jar" />
+        </dependency>
         <dependency org="com.fasterxml.jackson.core" name="jackson-core" rev="2.4.3">
             <artifact name="jackson-core" ext="jar" />
         </dependency>
