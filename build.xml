@@ -11,12 +11,9 @@
     <!-- environment setup/bootstrapping -->
     <mkdir dir="${lib-dir}" />
     <path id="ivy.lib.path">
-        <fileset dir="${lib-dir}" includes="*.jar" />
+        <fileset dir="${lib-dir}/" includes="*.jar" />
     </path>
     <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
-
-    <mkdir dir="${lib-dir}" /> <!-- taskdef fails if the directory isn't present -->
-    <taskdef name="ivy-retrieve" classname="org.apache.ivy.ant.IvyRetrieve" />
 
     <target name="bootstrap">
         <get dest="${lib-dir}/ivy-${ivy-version}.jar" src="http://central.maven.org/maven2/org/apache/ivy/ivy/${ivy-version}/ivy-${ivy-version}.jar" />
@@ -24,7 +21,7 @@
     </target>
 
     <target name="resolve">
-        <ivy:retrieve pattern="${lib-dir}/[artifact].[ext]" />
+        <ivy:retrieve pattern="${lib-dir}/[artifact]-[type]-[revision].[ext]" />
     </target>
 
     <target name="init">
