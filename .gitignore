@@ -1,3 +1,7 @@
 *.class
 lib
 build
+.classpath
+.metadata
+.project
+.recommenders
