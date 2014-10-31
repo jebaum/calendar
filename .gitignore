@@ -1,7 +1,8 @@
 *.class
 lib
-build
 .classpath
 .metadata
 .project
 .recommenders
+node_modules
+.DS_Store
