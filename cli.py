@@ -1,4 +1,4 @@
-import sys, json, datetime
+import sys, json, datetime, time
 import requests
 
 class Event(object):
@@ -55,22 +55,35 @@ def get_events(startTime, endTime):
 
     return events
 
-def display_daily_term(events):
+def display_daily_term(all_events):
     """
     Display today's events, printed to stdout
     Attempt to match orgmode style
     """
+    # Filter events to only those today
+    now = datetime.datetime.now()
+    events = [e for e in all_events if e.startDate.day == now.day and \
+                                       e.startDate.month == now.month and \
+                                       e.startDate.year == now.year]
+
+    # Print list of hours / events
     for i in range(0,24):
         hour = "%s:00" % (i)
         print(hour.rjust(5, ' '), '-'*10)
 
-    for e in events:
-        print(e.startDate, e.endDate)
+        for e in events:
+            if i == e.startDate.hour:
+                event_time = '%s:%s' % (e.startDate.hour, e.startDate.minute)
+                print(event_time.rjust(5, ' '), e.title)
+
+def datetime_to_seconds_since_epoch(dt):
+    return time.mktime(dt.timetuple())
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         print("Usage: python cli.py <start> <end>")
         sys.exit(1)
 
-    events = get_events(sys.argv[1], sys.argv[2])
+    # events = get_events(sys.argv[1], sys.argv[2])
+    events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
     display_daily_term(events)
