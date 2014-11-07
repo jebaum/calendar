@@ -80,9 +80,9 @@ def datetime_to_seconds_since_epoch(dt):
     return time.mktime(dt.timetuple())
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print("Usage: python cli.py <start> <end>")
-        sys.exit(1)
+    # if len(sys.argv) < 3:
+    #     print("Usage: python cli.py <start> <end>")
+    #     sys.exit(1)
 
     # events = get_events(sys.argv[1], sys.argv[2])
     events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
