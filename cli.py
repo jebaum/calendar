@@ -1,4 +1,5 @@
 import sys, json, datetime, time
+import curses
 import requests
 
 class Event(object):
@@ -79,11 +80,34 @@ def display_daily_term(all_events):
 def datetime_to_seconds_since_epoch(dt):
     return time.mktime(dt.timetuple())
 
+def display_ncurses(all_events):
+    stdscr = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    stdscr.keypad(1)
+
+    h,w = stdscr.getmaxyx()
+    stdscr.border()
+    stdscr.refresh()
+
+    for i in range(0,2):
+        time.sleep(1)
+        continue
+
+    curses.nocbreak()
+    stdscr.keypad(0)
+    curses.echo()
+    curses.endwin()
+
+    print(h,w)
+
 if __name__ == '__main__':
     # if len(sys.argv) < 3:
     #     print("Usage: python cli.py <start> <end>")
     #     sys.exit(1)
 
-    # events = get_events(sys.argv[1], sys.argv[2])
     events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
+    display_ncurses(events)
+
+    # events = get_events(sys.argv[1], sys.argv[2])
     display_daily_term(events)
