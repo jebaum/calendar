@@ -20,17 +20,23 @@
   margin-top: 50px;
 }
 
-.sidebar {
+.sidebar-section {
   border-right: 1px solid #e5e5e5;
   float: left;
   height: 100%;
-  padding: 15px;
   width: 125px;
 }
 
-.calendar {
-  height: 100%;
-  margin-left: 130px;
+.sidebar-contents {
   padding: 15px;
+}
+
+.main-section {
+  height: 100%;
   width: 100%;
+  margin-left: 125px;
+}
+
+.calendar {
+  padding: 15px;
 }
