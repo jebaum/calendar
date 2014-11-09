@@ -1,8 +1,8 @@
 var Dispatcher = require('./Dispatcher');
 
 var Actions = {
-  setCalendarTitle: function(title) {
-    Dispatcher.dispatch('SET_CALENDAR_TITLE', title);
+  setCalendar: function(title) {
+    Dispatcher.dispatch('SET_CALENDAR', title);
   }
 };
 

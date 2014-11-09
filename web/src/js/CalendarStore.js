@@ -1,20 +1,57 @@
+var API = require('./API');
+var DateUtil = require('./DateUtil');
 var Dispatcher = require('./Dispatcher');
 var _ = require('underscore');
-// var Store = require('./Store');
 
 function CalendarStore() {
-  this.title = 'year';
+  this.text = 'sample text';
+  this.title = 'default';
   this.listeners = [];
 }
 
 CalendarStore.prototype = {
-  get: function() {
+  getText: function() {
+    return this.text;
+  },
+
+  setText: function(t) {
+    this.text = t;
+    this.notify();
+  },
+
+  getTitle: function() {
     return this.title;
   },
 
-  set: function(t) {
+  setTitle: function(t) {
     this.title = t;
-    this.notify();
+
+    var dateRange;
+    switch(t) {
+      case 'year':
+        dateRange = DateUtil.getLastYear();
+        break;
+      case 'month':
+        dateRange = DateUtil.getLastMonth();
+        break;
+      case 'week':
+        dateRange = DateUtil.getLastWeek();
+        break;
+      case 'day':
+        dateRange = DateUtil.getLastDay();
+        break;
+      default:
+        console.error('invalid calendar title');
+    }
+
+    API.get(
+      {
+        startDate: dateRange.start.valueOf(),
+        endDate: dateRange.end.valueOf(),
+      },
+      this.setText.bind(this),
+      console.error
+    );
   },
 
   addChangeListener: function(callback) {
@@ -29,6 +66,6 @@ CalendarStore.prototype = {
 }
 
 var calendarStore = new CalendarStore();
-Dispatcher.register('SET_CALENDAR_TITLE', calendarStore.set.bind(calendarStore));
+Dispatcher.register('SET_CALENDAR', calendarStore.setTitle.bind(calendarStore));
 
 module.exports = calendarStore;

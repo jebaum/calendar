@@ -2,25 +2,25 @@ var Actions = require('./Actions');
 var React = require('react');
 
 var Sidebar = React.createClass({
-  setCalendarTitleMonth: function() {
-    Actions.setCalendarTitle('month');
+  setCalendarMonth: function() {
+    Actions.setCalendar('month');
   },
 
-  setCalendarTitleWeek: function() {
-    Actions.setCalendarTitle('week');
+  setCalendarWeek: function() {
+    Actions.setCalendar('week');
   },
 
-  setCalendarTitleDay: function() {
-    Actions.setCalendarTitle('day');
+  setCalendarDay: function() {
+    Actions.setCalendar('day');
   },
 
   render: function() {
     return (
       <div className="sidebar-contents">
         <ul>
-          <li onClick={this.setCalendarTitleMonth}>Month view</li>
-          <li onClick={this.setCalendarTitleWeek}>Week view</li>
-          <li onClick={this.setCalendarTitleDay}>Day view</li>
+          <li onClick={this.setCalendarMonth}>Month view</li>
+          <li onClick={this.setCalendarWeek}>Week view</li>
+          <li onClick={this.setCalendarDay}>Day view</li>
         </ul>
       </div>
     );

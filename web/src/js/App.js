@@ -11,7 +11,13 @@ var App = React.createClass({
     calendarTitle: {
       store: CalendarStore,
       fetch: function(store, fetchParams) {
-        return store.get();
+        return store.getTitle();
+      }
+    },
+    calendarText: {
+      store: CalendarStore,
+      fetch: function(store, fetchParams) {
+        return store.getText();
       }
     }
   })],
@@ -25,7 +31,10 @@ var App = React.createClass({
             <Sidebar />
           </div>
           <div className="main-section">
-            <Calendar type={this.state.calendarTitle} />
+            <Calendar
+              type={this.state.calendarTitle}
+              text={this.state.calendarText}
+            />
           </div>
         </div>
       </div>
