@@ -3,9 +3,10 @@
   "description": "CS 130 Calendar Web UI",
   "dependencies": {
     "browserify": "~3.44.x",
+    "express": "^4.10.1",
     "gulp": "3.8.x",
     "react": "0.12.x",
-    "underscore": "*"
+    "underscore": "^1.7.0"
   },
   "devDependencies": {
     "del": "^0.1.3",
