@@ -100,7 +100,12 @@ def display_daily_term(all_events):
 def datetime_to_seconds_since_epoch(dt):
     return time.mktime(dt.timetuple())
 
-from random import randint
+
+def hour_string(hour, minute):
+    hs = str(hour).rjust(2, '0')
+    ms = str(minute).rjust(2, '0')
+    return '%s:%s' % (hs, ms)
+
 class HourPad():
     def __init__(self, hour, screen_width):
         self.initialize(hour, 2, screen_width)
@@ -120,12 +125,7 @@ class HourPad():
         self.add_border()
 
         # Add hour to pad
-        self.pad.addstr(1,1,self.hour_string(self.hour, 0))
-
-    def hour_string(self, hour, minute):
-        hs = str(hour).rjust(2, '0')
-        ms = str(minute).rjust(2, '0')
-        return '%s:%s' % (hs, ms)
+        self.pad.addstr(1,1,hour_string(self.hour, 0))
 
     def add_border(self):
         # Special border on top for 1st
@@ -160,7 +160,7 @@ class HourPad():
         self.events.append(event)
 
         y = (len(self.events)-1)*2
-        self.pad.addstr(y*2+1, 7, self.hour_string(event.hour, event.minute))
+        self.pad.addstr(y*2+1, 7, hour_string(event.hour, event.minute))
         self.pad.addstr(y*2+1, 13, event.title[0:self.w])
         self.pad.addstr(y*2+2, 13, event.description[0:self.w])
 
@@ -188,7 +188,7 @@ class CursesView():
         y = -self.offset
         for i in range(24):
             p = pads[i]
-            if y >= 0 and y < self.h-80:
+            if y >= 0 and y+p.h < self.h-self.summary_h:
                 p.draw(y,0)
             y += p.h
 
@@ -202,7 +202,27 @@ class CursesView():
         for e in all_events:
             self.hour_pads[e.hour].add_event(e)
 
+    def initialize_summary(self):
+        h = 2*len(self.events)+1
+        self.summary_win = curses.newwin(h, self.w, self.h-h, 0)
+        self.summary_h = h
+
+    def draw_summary(self):
+        for i in range(len(self.events)):
+            e = self.events[i]
+            self.summary_win.addstr(i*2+1, 0, hour_string(e.hour, e.minute))
+            self.summary_win.addstr(i*2+1, 6, '-')
+            self.summary_win.addstr(i*2+1, 8, hour_string(e.endDate.hour, e.endDate.minute))
+            self.summary_win.addstr(i*2+1, 14, e.title)
+            self.summary_win.addstr(i*2+2, 14, e.description)
+
+        self.summary_win.border(' ', ' ', curses.ACS_HLINE, ' ', ' ', ' ', ' ', ' ')
+        self.summary_win.refresh()
+
     def display_daily(self, all_events):
+        self.events = all_events
+        self.initialize_summary()
+
         # Construct hour windows
         self.hour_pads = []
         for hour in range(0,24):
@@ -211,8 +231,10 @@ class CursesView():
 
         self.add_events(all_events)
 
+
         while True:
             self.refresh_pads(self.hour_pads)
+            self.draw_summary()
             c = self.stdscr.getch()
             if c == ord('q'):
                 # Exit
@@ -220,7 +242,7 @@ class CursesView():
             elif c == ord('j'):
                 # Move down
                 self.offset += 1
-                self.offset = min(self.total_hour_pad_height()-(self.h-80), self.offset)
+                self.offset = min(self.total_hour_pad_height()-(self.h-self.summary_h-10), self.offset)
                 self.stdscr.clear()
                 self.stdscr.refresh()
             elif c == ord('k'):
@@ -229,11 +251,6 @@ class CursesView():
                 self.offset = max(0,self.offset)
                 self.stdscr.clear()
                 self.stdscr.refresh()
-            elif c == ord('r'):
-                for p in self.hour_pads:
-                    p.resize(randint(4,10), self.w)
-
-
 
 if __name__ == '__main__':
     # if len(sys.argv) < 3:
