@@ -34,7 +34,7 @@ gulp.task('css', function() {
   return gulp.src(paths.sass)
     .pipe(sass({
         style: 'nested',
-        loadPath: ['./src/sass']
+        loadPath: ['./src/sass', './bower_components']
       })
       .on("error", notify.onError(function(error) {
         return "Error: " + error.message;
@@ -42,4 +42,10 @@ gulp.task('css', function() {
     .pipe(gulp.dest('./build/'));
 });
 
-gulp.task('default', ['clean', 'watch', 'js', 'css']);
+gulp.task('fonts', function() {
+  return gulp.src('./bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*.*')
+    .pipe(gulp.dest('./build/fonts/'));
+
+});
+
+gulp.task('default', ['clean', 'watch', 'js', 'css', 'fonts']);
