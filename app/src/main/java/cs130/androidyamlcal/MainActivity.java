@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonToken;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -378,15 +379,29 @@ public class MainActivity extends ActionBarActivity
 				g.writeStartObject();
 				g.writeStringField(CalendarDatabaseHelper.EVENT_TITLE, _event.getTitle());
 				g.writeStringField(CalendarDatabaseHelper.EVENT_LOCATION, _event.getLocation());
-				g.writeStringField(CalendarDatabaseHelper.EVENT_DESCRIPTION, _event.getDescription());
+				g.writeStringField(CalendarDatabaseHelper.EVENT_DESCRIPTION,
+						_event.getDescription());
 				g.writeStringField(CalendarDatabaseHelper.EVENT_CATEGORY, _event.getCategory());
-				g.writeNumberField(CalendarDatabaseHelper.EVENT_START_TIME, _event.getStartTime().getTime());
+				g.writeNumberField(CalendarDatabaseHelper.EVENT_START_TIME,
+						_event.getStartTime().getTime());
 				g.writeNumberField(CalendarDatabaseHelper.EVENT_END_TIME, _event.getEndTime().getTime());
 				g.writeEndObject();
 				g.writeEndArray();
 				g.close();
-				out.flush();
-				out.close();
+
+				InputStream in = connection.getInputStream();
+
+				String response = "";
+				byte[] buffer = new byte[1024];
+
+				while(in.read(buffer) > 0)
+				{
+					response += new String(buffer);
+				}
+				Log.d(TAG, response);
+				in.close();
+
+//				g.close();
 			}
 			catch (IOException ioe)
 			{
