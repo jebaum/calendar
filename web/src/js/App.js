@@ -27,10 +27,10 @@ var App = React.createClass({
       <div>
         <Navbar />
         <div className="below-nav">
-          <div className="sidebar-section">
+          <div className="sidebar-content-wrapper">
             <Sidebar />
           </div>
-          <div className="main-section">
+          <div className="main-content-wrapper">
             <Calendar
               type={this.state.calendarTitle}
               text={this.state.calendarText}
