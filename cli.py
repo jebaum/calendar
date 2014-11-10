@@ -84,22 +84,79 @@ def display_ncurses(all_events):
     stdscr = curses.initscr()
     curses.noecho()
     curses.cbreak()
-    stdscr.keypad(1)
 
     h,w = stdscr.getmaxyx()
-    stdscr.border()
-    stdscr.refresh()
+    hour_range = range(0,24)
+    hour_height = int(h/24)
+    if(h/24 < 3):
+        hours = int(h/3)
+        hour_range = range(0, hours)
+        hour_height = int(h/hours)
 
-    for i in range(0,2):
-        time.sleep(1)
-        continue
+    hour_wins = []
+    for hour in hour_range:
+        win_height = hour_height
+        # Last gets an extra
+        if hour == hour_range[-1]:
+            win_height += 1
+        win_width = w
+        win_y = hour_height * hour
+        win_x = 0
+        win = curses.newwin(win_height, win_width, win_y, win_x)
+        hour_wins.append(win)
+
+    for i in range(len(hour_wins)):
+        w = hour_wins[i]
+        # characters for sides, corners borders
+        # ls, rs, ts, bs, tl, tr, bl, br
+        
+        # Special border on top for 1st
+        tl = curses.ACS_VLINE
+        tr = curses.ACS_VLINE
+        if i == 0:
+            tl = curses.ACS_ULCORNER
+            tr = curses.ACS_URCORNER
+        # Special border on bottom for last
+        bl = curses.ACS_VLINE
+        br = curses.ACS_VLINE
+        b = ' ' 
+        if i == len(hour_wins) - 1:
+            bl = curses.ACS_LLCORNER
+            br = curses.ACS_LRCORNER
+            b = curses.ACS_HLINE
+
+        w.border(curses.ACS_VLINE,
+                 curses.ACS_VLINE,
+                 0,
+                 b,
+                 tl,
+                 tr,
+                 bl,
+                 br)
+        hour = "%s:00" % (i)
+        hour = hour.rjust(5, '0')
+        w.addstr(1,1,hour)
+
+        for e in all_events:
+            if i == e.startDate.hour:
+                w.addstr(1,7,e.title)
+
+        w.refresh()
+
+    # stdscr.refresh()
+
+    time.sleep(2)
 
     curses.nocbreak()
-    stdscr.keypad(0)
     curses.echo()
     curses.endwin()
 
-    print(h,w)
+    print(h, hour_range)
+
+def cleanup_ncruses():
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
 
 if __name__ == '__main__':
     # if len(sys.argv) < 3:
@@ -107,7 +164,11 @@ if __name__ == '__main__':
     #     sys.exit(1)
 
     events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
-    display_ncurses(events)
+    try:
+        display_ncurses(events)
+    except Exception as e:
+        cleanup_ncruses()
+        print(e)
 
     # events = get_events(sys.argv[1], sys.argv[2])
     display_daily_term(events)
