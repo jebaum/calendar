@@ -2,28 +2,10 @@ var express = require('express')
 var fs = require('fs');
 var app = express()
 
+app.use('/build', express.static('./build/'));
+
 app.get('/', function (req, res) {
   fs.readFile('index.html', 'utf-8', function(err, data) {
-    if (err) {
-      throw err;
-    } else {
-      res.send(data);
-    }
-  })
-});
-
-app.get('/build/bundle.js', function (req, res) {
-  fs.readFile('build/bundle.js', 'utf-8', function(err, data) {
-    if (err) {
-      throw err;
-    } else {
-      res.send(data);
-    }
-  })
-});
-
-app.get('/build/style.css', function (req, res) {
-  fs.readFile('build/style.css', 'utf-8', function(err, data) {
     if (err) {
       throw err;
     } else {
@@ -49,5 +31,4 @@ var server = app.listen(4567, function () {
   var port = server.address().port
 
   console.log('Listening at http://%s:%s', host, port)
-
 })
