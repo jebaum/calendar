@@ -1,7 +1,8 @@
+var AppBar = require('material-ui').AppBar;
+var AppCanvas = require('material-ui').AppCanvas;
 var Calendar = require('./Calendar');
 var CalendarStore = require('./CalendarStore');
 var Dispatcher = require('./Dispatcher');
-var Navbar = require('./Navbar');
 var React = require('react');
 var Sidebar = require('./Sidebar');
 var StateFromStore = require('./StateFromStore');
@@ -24,20 +25,18 @@ var App = React.createClass({
 
   render: function() {
     return (
-      <div>
-        <Navbar />
-        <div className="below-nav">
-          <div className="sidebar-content-wrapper">
-            <Sidebar />
-          </div>
-          <div className="main-content-wrapper">
+      <AppCanvas predefinedLayout={1}>
+        <AppBar title="YAMLCal" />
+        <div className="mui-app-content-canvas with-nav">
+          <Sidebar />
+          <div className="subContent">
             <Calendar
               type={this.state.calendarTitle}
               text={this.state.calendarText}
             />
           </div>
         </div>
-      </div>
+      </AppCanvas>
     );
   }
 });
