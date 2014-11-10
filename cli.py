@@ -100,6 +100,53 @@ def display_daily_term(all_events):
 def datetime_to_seconds_since_epoch(dt):
     return time.mktime(dt.timetuple())
 
+from random import randint
+class HourPad():
+    def __init__(self, hour, screen_width):
+        self.initialize(hour, 4, screen_width)
+
+    def initialize(self, hour, height, width):
+        self.h = height
+        self.w = width
+        self.hour = hour
+
+        # Create pad
+        self.pad = curses.newpad(self.h, self.w)
+        self.add_border()
+        
+        # Add hour to pad
+        hour_s = ("%s:00" % (self.hour)).rjust(5, '0')
+        self.pad.addstr(1,1,hour_s)
+        
+    def add_border(self):
+        # Special border on top for 1st
+        tl = tr = curses.ACS_VLINE
+        if self.hour == 0:
+            tl = curses.ACS_ULCORNER
+            tr = curses.ACS_URCORNER
+                
+        # Special border onbottom for last
+        bl = br = curses.ACS_VLINE
+        b = ' ' 
+        if self.hour == 23: 
+            bl = curses.ACS_LLCORNER
+            br = curses.ACS_LRCORNER
+            b = curses.ACS_HLINE
+
+        # characters for sides, corners borders
+        # ls, rs, ts, bs, tl, tr, bl, br
+        self.pad.border(curses.ACS_VLINE, curses.ACS_VLINE, 0, b, tl, tr, bl, br)
+
+    def resize(self, h, w):
+        self.initialize(self.hour, h, w)
+    
+
+    def draw(self, y, x):
+        # Display from ul corner (arg 3, arg 4) to br corner (arg 5, arg 6) showing ul corner of pad (arg 1, arg 2)
+        self.pad.refresh(0, 0,
+                         y, x,
+                         y+self.h, x+self.w)
+
 class CursesView():
     def __init__(self):
         self.stdscr = curses.initscr()
@@ -109,8 +156,6 @@ class CursesView():
         curses.curs_set(0)
 
         self.h, self.w = self.stdscr.getmaxyx()
-        self.hour_height = 4
-        self.hour_range = range(0,24)
         self.offset = 0
 
         self.messages = []
@@ -122,64 +167,20 @@ class CursesView():
         for m in self.messages:
             print(m)
 
-    def get_displayable_hour_range(self, max_h):
-        hours = min(int(max_h/self.hour_height), 24)
-        hour_offset = int(self.offset/self.hour_height)
-        return range(hour_offset, hours - hour_offset)
-
-    def border_pad(self, pad, i):
-        # Special border on top for 1st
-        tl = tr = curses.ACS_VLINE
-        if i == 0:
-            tl = curses.ACS_ULCORNER
-            tr = curses.ACS_URCORNER
-                
-        # Special border onbottom for last
-        bl = br = curses.ACS_VLINE
-        b = ' ' 
-        if i == self.hour_range[-1]:
-            bl = curses.ACS_LLCORNER
-            br = curses.ACS_LRCORNER
-            b = curses.ACS_HLINE
-
-        # characters for sides, corners borders
-        # ls, rs, ts, bs, tl, tr, bl, br
-        pad.border(curses.ACS_VLINE, curses.ACS_VLINE, 0, b, tl, tr, bl, br)
-
-    def create_hour_pad(self, i):
-        height = self.hour_height
-        if i == 23:
-            height += 1
-        pad = curses.newpad(height, self.w)
-        self.border_pad(pad, i)
-        
-        # Add hour to pad
-        hour = ("%s:00" % (i)).rjust(5, '0')
-        pad.addstr(1,1,hour)
-
-        return pad
-
     def refresh_pads(self, pads):
-        display_range = self.get_displayable_hour_range(self.h-80)
-        for i in self.hour_range:
+        y = -self.offset
+        for i in range(24): 
             p = pads[i]
-            y = i * self.hour_height - self.offset
-            if y < 0 or y > self.h-80:
-                continue
-            # Display from ul corner (arg 3, arg 4) to br corner (arg 5, arg 6) showing ul corner of pad (arg 1, arg 2)
-            p.refresh(0,0,
-                      y,0,
-                      y+self.hour_height,self.w) 
+            if y >= 0 and y < self.h-80:
+                p.draw(y,0)
+            y += p.h
 
     def display_daily(self, all_events):
         # Construct hour windows
         hour_pads = []
-        for hour in self.hour_range:
-            pad = self.create_hour_pad(hour)
+        for hour in range(0,24):
+            pad = HourPad(hour, self.w)
             hour_pads.append(pad)
-        # self.refresh_pads(hour_pads)
-
-        # time.sleep(1)
 
         while True:
             self.refresh_pads(hour_pads)
@@ -190,7 +191,7 @@ class CursesView():
             elif c == ord('j'):
                 # Move down
                 self.offset += 1
-                self.offset = min(self.hour_range[-1] * self.hour_height, self.offset)
+                self.offset = min(24 * 4, self.offset)
                 self.stdscr.clear()
                 self.stdscr.refresh()
             elif c == ord('k'):
@@ -199,6 +200,9 @@ class CursesView():
                 self.offset = max(0,self.offset)
                 self.stdscr.clear()
                 self.stdscr.refresh()
+            elif c == ord('r'):
+                for p in hour_pads:
+                    p.resize(randint(4,10), self.w)
 
 
 
