@@ -2,15 +2,14 @@ var autoprefix = require('gulp-autoprefixer');
 var browserify = require('browserify');
 var del = require('del');
 var gulp = require('gulp');
-var notify = require('gulp-notify');
+var less = require('gulp-less');
 var reactify = require('reactify');
-var sass = require('gulp-ruby-sass');
 var source = require('vinyl-source-stream');
 
 var paths = {
   app_jsx: ['./src/js/app.jsx'],
   js: ['./src/js/*.js'],
-  sass: ['./src/sass/*.scss'],
+  less: ['./src/less/style.less'],
 };
 
 gulp.task('clean', function(done) {
@@ -31,21 +30,16 @@ gulp.task('watch', function() {
 });
 
 gulp.task('css', function() {
-  return gulp.src(paths.sass)
-    .pipe(sass({
-        style: 'nested',
-        loadPath: ['./src/sass', './bower_components']
-      })
-      .on("error", notify.onError(function(error) {
-        return "Error: " + error.message;
-      })))
+  return gulp.src(paths.less)
+    .pipe(less({
+      paths: ['node_modules'],
+    }))
     .pipe(gulp.dest('./build/'));
 });
 
 gulp.task('fonts', function() {
   return gulp.src('./bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*.*')
     .pipe(gulp.dest('./build/fonts/'));
-
 });
 
 gulp.task('default', ['clean', 'watch', 'js', 'css', 'fonts']);
