@@ -1,0 +1,26 @@
+[
+ {
+  "title":"Class",
+  "location":"Location",
+  "description":"CS130",
+  "category":"important",
+  "startTime":1414000000000,
+  "endTime":1414005000000
+ },
+ {
+  "title":"More class",
+  "location":"nowhere",
+  "description":"ENGR110",
+  "category":"unimportant",
+  "startTime":1414010000000,
+  "endTime":1414013000000
+ },
+ {
+  "title":"More class",
+  "location":"nowhere",
+  "description":"ENGR110",
+  "category":"unimportant",
+  "startTime":1414010000000,
+  "endTime":1414013000000
+ }
+]

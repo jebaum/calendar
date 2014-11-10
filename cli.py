@@ -1,4 +1,4 @@
-import sys, json, datetime, time
+import sys, json, datetime, time, traceback
 import curses
 import requests
 
@@ -76,6 +76,17 @@ def get_events(startTime, endTime):
 
     return events
 
+def get_events_file(filename):
+    events = []
+    with open(filename, 'r') as f:
+        j = json.load(f)
+        for event in j:
+            e = Event()
+            e.load_from_json(event)
+            events.append(e)
+
+    return events
+
 def display_daily_term(all_events):
     """
     Display today's events, printed to stdout
@@ -150,19 +161,25 @@ class HourPad():
         self.initialize(self.hour, h, w)
 
     def draw(self, y, x):
+        self.draw_events()
         # Display from ul corner (arg 3, arg 4) to br corner (arg 5, arg 6) showing ul corner of pad (arg 1, arg 2)
         self.pad.refresh(0, 0,
                          y, x,
                          y+self.h, x+self.w)
 
-    def add_event(self, event):
-        self.resize(self.h+2, self.w)
-        self.events.append(event)
+    def draw_events(self):
+        for i in range(len(self.events)):
+            e = self.events[i]
+            y = i*2+1
+            self.pad.addstr(y, 7, hour_string(e.hour, e.minute))
+            self.pad.addstr(y, 13, e.title[0:self.w])
+            self.pad.addstr(y+1, 13, e.description[0:self.w])
 
-        y = (len(self.events)-1)*2
-        self.pad.addstr(y*2+1, 7, hour_string(event.hour, event.minute))
-        self.pad.addstr(y*2+1, 13, event.title[0:self.w])
-        self.pad.addstr(y*2+2, 13, event.description[0:self.w])
+
+    def add_event(self, event):
+        self.events.append(event)
+        self.resize(2+len(self.events)*2, self.w)
+
 
 class CursesView():
     def __init__(self):
@@ -203,7 +220,7 @@ class CursesView():
             self.hour_pads[e.hour].add_event(e)
 
     def initialize_summary(self):
-        h = 2*len(self.events)+1
+        h = 2*len(self.events)+2
         self.summary_win = curses.newwin(h, self.w, self.h-h, 0)
         self.summary_h = h
 
@@ -257,13 +274,15 @@ if __name__ == '__main__':
     #     print("Usage: python cli.py <start> <end>")
     #     sys.exit(1)
 
-    events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
+    # events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
+    events = get_events_file("json.txt")
     c = CursesView()
     try:
         c.display_daily(events)
     except Exception as e:
         c.cleanup()
         print(e)
+        traceback.print_exc()
     finally:
         c.cleanup()
 
