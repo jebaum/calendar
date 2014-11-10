@@ -22,6 +22,26 @@ class Event(object):
 
         return json.dumps(json_dict)
 
+    @property
+    def minute(self):
+        return self.startDate.minute
+    
+    @property
+    def hour(self):
+        return self.startDate.hour
+
+    @property
+    def day(self):
+        return self.startDate.day
+
+    @property
+    def month(self):
+        return self.startDate.month
+
+    @property
+    def year(self):
+        return self.startDate.year
+
     def clamp_seconds_since_epoch(self, sec):
         sec_string = str(sec)
         if len(sec_string) > 10:
@@ -73,90 +93,92 @@ def display_daily_term(all_events):
         print(hour.rjust(5, ' '), '-'*10)
 
         for e in events:
-            if i == e.startDate.hour:
-                event_time = '%s:%s' % (e.startDate.hour, e.startDate.minute)
+            if i == e.hour:
+                event_time = '%s:%s' % (e.hour, e.minute)
                 print(event_time.rjust(5, ' '), e.title)
 
 def datetime_to_seconds_since_epoch(dt):
     return time.mktime(dt.timetuple())
 
-def display_ncurses(all_events):
-    stdscr = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
+class CursesView():
+    def __init__(self):
+        self.stdscr = curses.initscr()
+        curses.noecho()
+        curses.cbreak()
 
-    h,w = stdscr.getmaxyx()
-    hour_range = range(0,24)
-    hour_height = int(h/24)
-    if(h/24 < 3):
-        hours = int(h/3)
-        hour_range = range(0, hours)
-        hour_height = int(h/hours)
+        self.h, self.w = self.stdscr.getmaxyx()
 
-    hour_wins = []
-    for hour in hour_range:
-        win_height = hour_height
-        # Last gets an extra
-        if hour == hour_range[-1]:
-            win_height += 1
-        win_width = w
-        win_y = hour_height * hour
-        win_x = 0
-        win = curses.newwin(win_height, win_width, win_y, win_x)
-        hour_wins.append(win)
+    def cleanup(self):
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
 
-    for i in range(len(hour_wins)):
-        w = hour_wins[i]
+    def get_displayable_hours(self):
+        """
+        Determine maximum height for each hour block
+        must be above 3
+        adjust hour range to what can be displayed on screen
+        return: hour_range, hour_height
+        """
+        hours = min(int(self.h/3), 24)
+        hour_range = range(0,hours)
+        hour_height = int(self.h/hours)
+
+        return hour_range, hour_height
+
+    def display_daily(self, all_events):
+        hour_range, hour_height = self.get_displayable_hours()
+
+        # Construct hour windows
+        hour_wins = []
+        for hour in hour_range:
+            win_height = hour_height
+            # Last gets an extra
+            if hour == hour_range[-1]:
+                win_height += 1
+            win_width = self.w
+            win_y = hour_height * hour
+            win_x = 0
+            win = curses.newwin(win_height, win_width, win_y, win_x)
+            hour_wins.append(win)
+
+        # Construct hour window borders
         # characters for sides, corners borders
         # ls, rs, ts, bs, tl, tr, bl, br
+        for i in range(len(hour_wins)):
+            w = hour_wins[i]
         
-        # Special border on top for 1st
-        tl = curses.ACS_VLINE
-        tr = curses.ACS_VLINE
-        if i == 0:
-            tl = curses.ACS_ULCORNER
-            tr = curses.ACS_URCORNER
-        # Special border on bottom for last
-        bl = curses.ACS_VLINE
-        br = curses.ACS_VLINE
-        b = ' ' 
-        if i == len(hour_wins) - 1:
-            bl = curses.ACS_LLCORNER
-            br = curses.ACS_LRCORNER
-            b = curses.ACS_HLINE
+            # Special border on top for 1st
+            tl = tr = curses.ACS_VLINE
+            if i == 0:
+                tl = curses.ACS_ULCORNER
+                tr = curses.ACS_URCORNER
+                
+            # Special border on bottom for last
+            bl = br = curses.ACS_VLINE
+            b = ' ' 
+            if i == len(hour_wins) - 1:
+                bl = curses.ACS_LLCORNER
+                br = curses.ACS_LRCORNER
+                b = curses.ACS_HLINE
+    
+            w.border(curses.ACS_VLINE, curses.ACS_VLINE, 0, b, tl, tr, bl, br)
 
-        w.border(curses.ACS_VLINE,
-                 curses.ACS_VLINE,
-                 0,
-                 b,
-                 tl,
-                 tr,
-                 bl,
-                 br)
-        hour = "%s:00" % (i)
-        hour = hour.rjust(5, '0')
-        w.addstr(1,1,hour)
+        # Write hour information
+        for i in range(len(hour_wins)):
+            w = hour_wins[i]    
+            hour = "%s:00" % (i)
+            hour = hour.rjust(5, '0')
+            w.addstr(1,1,hour)
 
-        for e in all_events:
-            if i == e.startDate.hour:
-                w.addstr(1,7,e.title)
+            for e in all_events:
+                if i == e.startDate.hour:
+                    w.addstr(1,7,e.title)
+                    w.addstr(2,7,e.description)
 
-        w.refresh()
+            w.refresh()
 
-    # stdscr.refresh()
-
-    time.sleep(2)
-
-    curses.nocbreak()
-    curses.echo()
-    curses.endwin()
-
-    print(h, hour_range)
-
-def cleanup_ncruses():
-    curses.nocbreak()
-    curses.echo()
-    curses.endwin()
+        time.sleep(5)
 
 if __name__ == '__main__':
     # if len(sys.argv) < 3:
@@ -164,11 +186,14 @@ if __name__ == '__main__':
     #     sys.exit(1)
 
     events = get_events(0, datetime_to_seconds_since_epoch(datetime.datetime.now()))
+    c = CursesView()
     try:
-        display_ncurses(events)
+        c.display_daily(events)
     except Exception as e:
-        cleanup_ncruses()
+        c.cleanup()
         print(e)
+    finally:
+        c.cleanup()
 
     # events = get_events(sys.argv[1], sys.argv[2])
     display_daily_term(events)
