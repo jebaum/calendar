@@ -4,26 +4,30 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -37,11 +41,14 @@ public class MainActivity extends ActionBarActivity
 	private ArrayList<Event> _dayEvents = new ArrayList<Event>();
 	private EventAdapter _eventAdapter;
 	private CalendarView _calendarView;
-	private View _dialogView;
+	private View _newAddressDialogView;
+	private View _addEventDialogView;
 	private Session _session;
 	private FetchEventsTask _fetchEventsTask;
-	private ProgressDialog _progressDialog;
+	private ProgressDialog _fetchProgressDialog;
+	private ProgressDialog _postProgressDialog;
 	private CalendarDatabaseHelper _calendarDatabaseHelper;
+	private PostEventTask _postEventTask;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -64,43 +71,133 @@ public class MainActivity extends ActionBarActivity
 				updateEvents(year, month, dayOfMonth);
 			}
 		});
+
+		if (!_session.isOffline())
+		{
+			if (_session.getAddress() == null)
+			{
+				createNewAddressDialog();
+			}
+			else
+			{
+				_fetchEventsTask = new FetchEventsTask();
+				_fetchEventsTask.execute();
+				showFetchProgressDialog();
+			}
+		}
 	}
 
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		if (!_session.isOffline())
-		{
-			if (_session.getAddress() == null)
-			{
-				createDialog();
-			}
-			else
-			{
-				_fetchEventsTask = new FetchEventsTask();
-				_fetchEventsTask.execute();
-				showProgressDialog();
-			}
-		}
+
 	}
 
 	@Override
 	public void onDestroy()
 	{
-		if (_fetchEventsTask != null)
+		if (_fetchProgressDialog != null)
 		{
-//			_fetchEventsTask.cancel(true);
-			_progressDialog.cancel();
+			_fetchProgressDialog.cancel();
+		}
+		if (_postProgressDialog != null)
+		{
+			_postProgressDialog.cancel();
 		}
 		super.onDestroy();
 	}
 
-	private void showProgressDialog()
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if (_progressDialog == null)
+		boolean ret = super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.main, menu);
+		return ret;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId())
 		{
-			_progressDialog = ProgressDialog.show(
+			case R.id.add_event:
+				Log.d(TAG, "add event!!!!!");
+//				createAddEventDialog();
+				Intent i = new Intent(MainActivity.this, AddEventActivity.class);
+				startActivityForResult(i, 1);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if (requestCode == 1)
+		{
+			if(resultCode == RESULT_OK)
+			{
+				Event event = new Event();
+				event.setTitle(data.getStringExtra(CalendarDatabaseHelper.EVENT_TITLE));
+				event.setLocation(data.getStringExtra(CalendarDatabaseHelper.EVENT_LOCATION));
+				event.setDescription(data.getStringExtra(CalendarDatabaseHelper.EVENT_DESCRIPTION));
+				event.setCategory(data.getStringExtra(CalendarDatabaseHelper.EVENT_CATEGORY));
+				event.setStartTime(new Date(data.getLongExtra(CalendarDatabaseHelper
+						.EVENT_START_TIME, 0)));
+				event.setEndTime(new Date(data.getLongExtra(CalendarDatabaseHelper.EVENT_END_TIME,
+						0)));
+
+				DateFormat df = DateFormat.getDateTimeInstance();
+				Log.d(TAG, "new event start time: " + df.format(event.getStartTime()));
+				_postEventTask = new PostEventTask(event);
+				_postEventTask.execute();
+				showPostProgressDialog();
+				//_calendarDatabaseHelper.addEvent(event);/////
+			}
+			if (resultCode == RESULT_CANCELED)
+			{
+				Log.d(TAG, "result_canceled");
+				//Write your code if there's no result
+			}
+		}
+	}
+
+	private void showPostProgressDialog()
+	{
+		if (_postProgressDialog == null)
+		{
+			_postProgressDialog = ProgressDialog.show(
+					MainActivity.this,
+					null,
+					"Sending Event",
+					true,
+					true,
+					new DialogInterface.OnCancelListener()
+					{
+						@Override
+						public void onCancel(DialogInterface dialog)
+						{
+							if (_postEventTask != null)
+							{
+								_postEventTask.cancel(true);
+							}
+						}
+					}
+			);
+		}
+		else
+		{
+			_postProgressDialog.show();
+		}
+	}
+
+	private void showFetchProgressDialog()
+	{
+		if (_fetchProgressDialog == null)
+		{
+			_fetchProgressDialog = ProgressDialog.show(
 					MainActivity.this,
 					null,
 					"Loading Events",
@@ -122,7 +219,7 @@ public class MainActivity extends ActionBarActivity
 		}
 		else
 		{
-			_progressDialog.show();
+			_fetchProgressDialog.show();
 		}
 	}
 
@@ -175,7 +272,7 @@ public class MainActivity extends ActionBarActivity
 				selectedDate.getDate());
 	}
 
-	private void createDialog()
+	private void createAddEventDialog()
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 		// Get the layout inflater
@@ -183,19 +280,49 @@ public class MainActivity extends ActionBarActivity
 
 		// Inflate and set the layout for the dialog
 		// Pass null as the parent view because its going in the dialog layout
-		_dialogView = inflater.inflate(R.layout.dialog_new_address, null);
-		builder.setView(_dialogView)
+		_addEventDialogView = inflater.inflate(R.layout.add_event, null);
+		builder.setView(_addEventDialogView)
+				// Add action buttons
+				.setPositiveButton("Add", new DialogInterface.OnClickListener()
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int id)
+					{
+						Log.d(TAG, "added");
+					}
+				})
+				.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						Log.d(TAG, "canceled");
+					}
+				})
+				.setTitle("Add Event");
+		builder.show();
+	}
+
+	private void createNewAddressDialog()
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+		// Get the layout inflater
+		LayoutInflater inflater = getLayoutInflater();
+
+		// Inflate and set the layout for the dialog
+		// Pass null as the parent view because its going in the dialog layout
+		_newAddressDialogView = inflater.inflate(R.layout.dialog_new_address, null);
+		builder.setView(_newAddressDialogView)
 				// Add action buttons
 				.setPositiveButton("Set", new DialogInterface.OnClickListener()
 				{
 					@Override
 					public void onClick(DialogInterface dialog, int id)
 					{
-						EditText addressEditText = (EditText) _dialogView.findViewById(R.id.address);
+						EditText addressEditText = (EditText) _newAddressDialogView.findViewById(R.id.address);
 						updateSession(_session.isOffline(), addressEditText.getText().toString());
 						_fetchEventsTask = new FetchEventsTask();
 						_fetchEventsTask.execute();
-						showProgressDialog();
+						showFetchProgressDialog();
 						Log.d(TAG, "address: " + addressEditText.getText().toString());
 					}
 				})
@@ -210,6 +337,77 @@ public class MainActivity extends ActionBarActivity
 				.setTitle("Set new Address")
 				.setMessage("Could not connect to server, set new address or work offline");
 		builder.show();
+	}
+
+	private class PostEventTask extends AsyncTask<Void,Void,Void>
+	{
+		private boolean _failed = false;
+		private Event _event;
+
+		public PostEventTask(Event event)
+		{
+			_event = event;
+		}
+
+		@Override
+		protected Void doInBackground(Void... params)
+		{
+			HttpURLConnection connection;
+			String fullAddress;
+			try
+			{
+				// currently using static value for start and end dates and ip
+				if (_session.getAddress().matches("[a-z]+://.*"))
+				{
+					fullAddress = _session.getAddress();
+				}
+				else
+				{
+					fullAddress = "http://" + _session.getAddress();
+				}
+				URL url = new URL(fullAddress + ":4567");
+				connection = (HttpURLConnection) url.openConnection();
+				connection.setDoOutput(true);
+
+				OutputStream out = connection.getOutputStream();
+
+				JsonFactory jsonFactory = new JsonFactory();
+				JsonGenerator g = jsonFactory.createGenerator(out);
+
+				g.writeStartArray();
+				g.writeStartObject();
+				g.writeStringField(CalendarDatabaseHelper.EVENT_TITLE, _event.getTitle());
+				g.writeStringField(CalendarDatabaseHelper.EVENT_LOCATION, _event.getLocation());
+				g.writeStringField(CalendarDatabaseHelper.EVENT_DESCRIPTION, _event.getDescription());
+				g.writeStringField(CalendarDatabaseHelper.EVENT_CATEGORY, _event.getCategory());
+				g.writeNumberField(CalendarDatabaseHelper.EVENT_START_TIME, _event.getStartTime().getTime());
+				g.writeNumberField(CalendarDatabaseHelper.EVENT_END_TIME, _event.getEndTime().getTime());
+				g.writeEndObject();
+				g.writeEndArray();
+				g.close();
+				out.flush();
+				out.close();
+			}
+			catch (IOException ioe)
+			{
+				Log.e(TAG, "error", ioe);
+				_failed = true;
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void args)
+		{
+			if (_failed)
+			{
+				createNewAddressDialog();
+			}
+			_calendarDatabaseHelper.addEvent(_event);
+			printEvents();
+			updateEvents();
+			_postProgressDialog.cancel();
+		}
 	}
 
 	private class FetchEventsTask extends AsyncTask<Void,Void,Void>
@@ -294,11 +492,11 @@ public class MainActivity extends ActionBarActivity
 		{
 			if (_failed)
 			{
-				createDialog();
+				createNewAddressDialog();
 			}
 			printEvents();
 			updateEvents();
-			_progressDialog.cancel();
+			_fetchProgressDialog.cancel();
 		}
 	}
 

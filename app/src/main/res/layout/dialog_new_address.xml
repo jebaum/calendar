@@ -9,6 +9,6 @@
         android:id="@+id/address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Address"/>
+        android:hint="@string/address_hint"/>
 
 </LinearLayout>
