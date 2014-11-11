@@ -25,3 +25,52 @@
     }
   }
 }
+
+.calendar-wrapper-week, .calendar-wrapper-month {
+  width: 700px;
+}
+
+.calendar-wrapper-day {
+  width: 100px;
+}
+
+.calendar-wrapper-month {
+  height: 540px;
+
+  .cell {
+    height: 91px;
+  }
+}
+
+.calendar-wrapper-week, .calendar-wrapper-day {
+  height: 300px;
+
+  .cell {
+    height: 301px;
+  }
+}
+
+.calendar-wrapper {
+
+  .calendar {
+    width: 100%;
+
+    .cell {
+      width: 101px;
+      border: thin solid @grey-300;
+      vertical-align: top;
+      padding: 4px;
+      display: inline-block;
+      margin-top: -1px;
+      margin-left: -1px;
+    }
+
+    .cell-today {
+      background-color: @grey-300;
+    }
+
+    .cell-disabled {
+      color: @grey-300;
+    }
+  }
+}

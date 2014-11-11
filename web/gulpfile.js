@@ -26,7 +26,7 @@ gulp.task('js', function() {
 
 gulp.task('watch', function() {
   gulp.watch(paths.js, ['js']);
-  gulp.watch(paths.sass, ['css']);
+  gulp.watch(paths.less, ['css']);
 });
 
 gulp.task('css', function() {

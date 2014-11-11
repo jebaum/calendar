@@ -1,6 +1,6 @@
 
 var DateUtil = {
-  getLastYear: function() {
+  getYear: function() {
     var today = new Date();
 
     var year = today.getUTCDate();
@@ -11,19 +11,19 @@ var DateUtil = {
     }
   },
 
-  getLastMonth: function() {
+  getMonth: function() {
     var today = new Date();
 
     var year = today.getUTCFullYear();
     var month = today.getUTCMonth();
 
     return {
-      start: new Date(year, month - 1),
-      end: new Date(year, month),
+      start: new Date(year, month),
+      end: new Date(year, month + 1),
     }
   },
 
-  getLastWeek: function() {
+  getWeek: function() {
     var today = new Date();
 
     var year = today.getUTCFullYear();
@@ -35,12 +35,12 @@ var DateUtil = {
     var lastSunday = dayOfMonth - dayOfWeek;
 
     return {
-      start: new Date(year, month, lastSunday - 7),
-      end: new Date(year, month, lastSunday),
+      start: new Date(year, month, lastSunday),
+      end: new Date(year, month, lastSunday + 7),
     }
   },
 
-  getLastDay: function() {
+  getDay: function() {
     var today = new Date();
 
     var year = today.getUTCFullYear();
@@ -49,8 +49,8 @@ var DateUtil = {
     var dayOfMonth = today.getUTCDate();
 
     return {
-      start: new Date(year, month, dayOfMonth - 1),
-      end: new Date(year, month, dayOfMonth),
+      start: new Date(year, month, dayOfMonth),
+      end: new Date(year, month, dayOfMonth + 1),
     }
   }
 }

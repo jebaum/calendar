@@ -5,7 +5,7 @@ var _ = require('underscore');
 
 function CalendarStore() {
   this.text = 'sample text';
-  this.title = 'default';
+  this.title = 'month';
   this.listeners = [];
 }
 
@@ -29,16 +29,16 @@ CalendarStore.prototype = {
     var dateRange;
     switch(t) {
       case 'year':
-        dateRange = DateUtil.getLastYear();
+        dateRange = DateUtil.getYear();
         break;
       case 'month':
-        dateRange = DateUtil.getLastMonth();
+        dateRange = DateUtil.getMonth();
         break;
       case 'week':
-        dateRange = DateUtil.getLastWeek();
+        dateRange = DateUtil.getWeek();
         break;
       case 'day':
-        dateRange = DateUtil.getLastDay();
+        dateRange = DateUtil.getDay();
         break;
       default:
         console.error('invalid calendar title');
