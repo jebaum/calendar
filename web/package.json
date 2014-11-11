@@ -6,6 +6,7 @@
     "express": "^4.10.1",
     "gulp": "3.8.x",
     "material-ui": "^0.2.1",
+    "moment": "^2.8.3",
     "react": "0.12.x",
     "underscore": "^1.7.0"
   },

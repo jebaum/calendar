@@ -3,6 +3,7 @@ var React = require('react');
 var Paper = require('material-ui').Paper;
 var PropTypes = require('react').PropTypes;
 var classSet = require('react/addons').addons.classSet;
+var moment = require('moment');
 
 var Cell = React.createClass({
   render: function() {
@@ -47,19 +48,15 @@ var Calendar = React.createClass({
     var day = range.start;
     var cells = [];
     while (day < range.end) {
-      var isToday = day.getUTCDate() === (new Date()).getUTCDate();
-      var isDisabled = day.getUTCMonth() !== (new Date()).getUTCMonth();
-      var key = '' + day.getUTCDate() + '-' + day.getUTCMonth();
+      var isToday = day.date() === moment().date();
+      var isDisabled = day.month() !== moment().month();
+      var key = '' + day.date() + '-' + day.month();
       cells.push(
         <Cell today={isToday} disabled={isDisabled} key={key}>
-          {day.getUTCDate()}
+          {day.date()}
         </Cell>
       );
-      day = new Date(
-        day.getUTCFullYear(),
-        day.getUTCMonth(),
-        day.getUTCDate() + 1
-      );
+      day.add(1, 'days');
     }
 
     return (
@@ -78,32 +75,20 @@ var Calendar = React.createClass({
 
   renderMonth: function() {
     var range = DateUtil.getMonth();
-    var day = new Date(
-      range.start.getUTCFullYear(),
-      range.start.getUTCMonth(),
-      range.start.getUTCDate() - range.start.getUTCDay()
-    );
-    var end = new Date(
-      range.end.getUTCFullYear(),
-      range.end.getUTCMonth(),
-      range.end.getUTCDate() + ( 7 - range.end.getUTCDay())
-    );
+    var day = range.start.startOf('week');
+    var end = range.end.endOf('week');
     var cells = [];
     var i = 0;
     while (day < end) {
-      var isToday = day.getUTCDate() === (new Date()).getUTCDate();
-      var isDisabled = day.getUTCMonth() !== (new Date()).getUTCMonth();
-      var key = '' + day.getUTCDate() + '-' + day.getUTCMonth();
+      var isToday = day.date() === moment().date();
+      var isDisabled = day.month() !== moment().month();
+      var key = '' + day.date() + '-' + day.month();
       cells.push((
         <Cell today={isToday} disabled={isDisabled} key={key}>
-          {day.getUTCDate()}
+          {day.date()}
         </Cell>
       ));
-      day = new Date(
-        day.getUTCFullYear(),
-        day.getUTCMonth(),
-        day.getUTCDate() + 1
-      );
+      day.add(1, 'days');
       i++;
       if (i === 7) {
         cells.push(<br />);
