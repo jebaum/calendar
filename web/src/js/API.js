@@ -7,13 +7,13 @@ var API = {
     request
       .get('/events')
       .query({
-        start_date: params.startDate,
-        end_date: params.endDate,
+        start_date: params.startDate.unix(),
+        end_date: params.endDate.unix(),
       })
       .end(function(res) {
         if (res.ok) {
           if (callback) {
-            callback(res.text);
+            callback(JSON.parse(res.text));
           }
         } else {
           console.error('Request error: ' + res.text);
