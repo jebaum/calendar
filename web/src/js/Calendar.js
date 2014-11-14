@@ -84,7 +84,7 @@ var Calendar = React.createClass({
 
     return (
       <div>
-        <h1>day view</h1>
+        <h1>{moment().format('dddd, MMMM Do')}</h1>
         <div className="calendar-wrapper calendar-wrapper-day">
           <Paper rounded={false}>
             <div className="calendar">
@@ -130,7 +130,7 @@ var Calendar = React.createClass({
 
     return (
       <div>
-        <h1>week view</h1>
+        <h1>{range.start.format('MMMM Do') + ' - ' + range.end.format('Do')}</h1>
         <div className="calendar-wrapper calendar-wrapper-week">
           <Paper rounded={false}>
             <div className="calendar">
@@ -169,7 +169,7 @@ var Calendar = React.createClass({
 
     return (
       <div>
-        <h1>month view</h1>
+        <h1>{moment().format('MMMM')}</h1>
         <div className="calendar-wrapper calendar-wrapper-month">
           <Paper rounded={false}>
             <div className="calendar">
