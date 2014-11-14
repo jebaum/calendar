@@ -1,6 +1,20 @@
 var express = require('express')
 var fs = require('fs');
-var app = express()
+var moment = require('moment');
+var app = express();
+
+var events = [
+  {
+    name: 'event1',
+    start: moment().startOf('week').add(5, 'hours').unix(),
+    end: moment().startOf('week').add(6, 'hours').unix(),
+  },
+  {
+    name: 'event2',
+    start: moment().endOf('week').subtract(20, 'hours').unix(),
+    end: moment().endOf('week').subtract(12, 'hours').unix(),
+  },
+]
 
 app.use('/build', express.static('./build/'));
 
@@ -15,14 +29,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/events', function (req, res) {
-  var startDate = req.query.start_date;
-  var endDate = req.query.end_date;
-  var e = {
-    startDate: startDate,
-    endDate: endDate,
-  };
-
-  res.send(JSON.stringify(e));
+  res.send(JSON.stringify(events));
 });
 
 var server = app.listen(4567, function () {

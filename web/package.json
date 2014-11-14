@@ -7,6 +7,7 @@
     "gulp": "3.8.x",
     "material-ui": "^0.2.1",
     "moment": "^2.8.3",
+    "moment-range": "^1.0.5",
     "react": "0.12.x",
     "underscore": "^1.7.0"
   },
