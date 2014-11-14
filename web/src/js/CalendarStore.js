@@ -25,33 +25,7 @@ CalendarStore.prototype = {
 
   setTitle: function(t) {
     this.title = t;
-
-    var dateRange;
-    switch(t) {
-      case 'year':
-        dateRange = DateUtil.getYear();
-        break;
-      case 'month':
-        dateRange = DateUtil.getMonth();
-        break;
-      case 'week':
-        dateRange = DateUtil.getWeek();
-        break;
-      case 'day':
-        dateRange = DateUtil.getDay();
-        break;
-      default:
-        console.error('invalid calendar title');
-    }
-
-    API.get(
-      {
-        startDate: dateRange.start.valueOf(),
-        endDate: dateRange.end.valueOf(),
-      },
-      this.setText.bind(this),
-      console.error
-    );
+    this.notify();
   },
 
   addChangeListener: function(callback) {
