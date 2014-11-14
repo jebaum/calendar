@@ -1,9 +1,14 @@
+'use strict';
+
 var DateUtil = require('./DateUtil');
+var EventStore = require('./EventStore');
 var React = require('react');
 var Paper = require('material-ui').Paper;
 var PropTypes = require('react').PropTypes;
+var StateFromStore = require('./StateFromStore');
 var classSet = require('react/addons').addons.classSet;
-var moment = require('moment');
+var moment = require('moment-range');
+var _ = require('underscore');
 
 var Cell = React.createClass({
   render: function() {
@@ -20,13 +25,63 @@ var Cell = React.createClass({
   }
 });
 
-var Calendar = React.createClass({
+var EventBlock = React.createClass({
   propTypes: {
-    type: PropTypes.oneOf(['day', 'week', 'month', 'year']),
-    text: PropTypes.string,
+    range: PropTypes.object.isRequired,
+    event: PropTypes.object.isRequired,
   },
 
-  renderDay: function() {
+  render: function() {
+    var eventRange = this.props.event.range;
+    var range = this.props.range;
+    var total = range.end - range.start;
+    var topOffset = Math.max(eventRange.start - range.start, 0) / total;
+    var duration = (eventRange.end - eventRange.start) / total;
+
+    var style = {
+      'top': '' + (topOffset * 100) + '%',
+      'minHeight': '' + (duration * 100) + '%',
+    }
+
+    return (
+      <div
+        className="event-block"
+        style={style}>
+        {this.props.event.text}
+      </div>
+    );
+  }
+});
+
+var Calendar = React.createClass({
+  mixins: [StateFromStore({
+    events: {
+      store: EventStore,
+      fetch: function(store, fetchParams) {
+        return store.getEvents();
+      }
+    }
+  })],
+
+  propTypes: {
+    type: PropTypes.oneOf(['day', 'week', 'month', 'year']),
+  },
+
+  renderDay: function(events) {
+    var dayRange = DateUtil.getDay();
+    var eventBlocks = [];
+    _.each(events, function(event) {
+      if (dayRange.overlaps(event.range)) {
+        var intersectingEvent = {
+          range: dayRange.intersect(event.range),
+          text: event.name,
+        };
+        eventBlocks.push(
+          <EventBlock event={intersectingEvent} range={dayRange} />
+        );
+      }
+    });
+
     return (
       <div>
         <h1>day view</h1>
@@ -34,7 +89,8 @@ var Calendar = React.createClass({
           <Paper rounded={false}>
             <div className="calendar">
               <Cell>
-                {(new Date()).getUTCDate()}
+                {dayRange.start.date()}
+                {eventBlocks}
               </Cell>
             </div>
           </Paper>
@@ -43,21 +99,34 @@ var Calendar = React.createClass({
     );
   },
 
-  renderWeek: function() {
+  renderWeek: function(events) {
     var range = DateUtil.getWeek();
-    var day = range.start;
     var cells = [];
-    while (day < range.end) {
+    range.by('days', function(day) {
+      var eventBlocks = [];
+      var dayRange = moment().range(day, moment(day).add(1, 'days'));
+      _.each(events, function(event) {
+        if (dayRange.overlaps(event.range)) {
+          var intersectingEvent = {
+            range: dayRange.intersect(event.range),
+            text: event.name,
+          };
+          eventBlocks.push(
+            <EventBlock event={intersectingEvent} range={dayRange} />
+          );
+        }
+      });
+
       var isToday = day.date() === moment().date();
       var isDisabled = day.month() !== moment().month();
       var key = '' + day.date() + '-' + day.month();
       cells.push(
         <Cell today={isToday} disabled={isDisabled} key={key}>
           {day.date()}
+          {eventBlocks}
         </Cell>
       );
-      day.add(1, 'days');
-    }
+    });
 
     return (
       <div>
@@ -73,13 +142,16 @@ var Calendar = React.createClass({
     );
   },
 
-  renderMonth: function() {
+  renderMonth: function(events) {
     var range = DateUtil.getMonth();
-    var day = range.start.startOf('week');
-    var end = range.end.endOf('week');
+    var fullRange = moment().range(
+      range.start.startOf('week'),
+      range.end.endOf('week')
+    );
+
     var cells = [];
     var i = 0;
-    while (day < end) {
+    fullRange.by('day', function(day) {
       var isToday = day.date() === moment().date();
       var isDisabled = day.month() !== moment().month();
       var key = '' + day.date() + '-' + day.month();
@@ -88,13 +160,12 @@ var Calendar = React.createClass({
           {day.date()}
         </Cell>
       ));
-      day.add(1, 'days');
       i++;
       if (i === 7) {
         cells.push(<br />);
         i = 0;
       }
-    }
+    });
 
     return (
       <div>
@@ -111,12 +182,13 @@ var Calendar = React.createClass({
   },
 
   render: function() {
+    var events = this.state.events;
     if (this.props.type === 'month') {
-      return this.renderMonth();
+      return this.renderMonth(events);
     } else if (this.props.type === 'week') {
-      return this.renderWeek();
+      return this.renderWeek(events);
     } else if (this.props.type === 'day') {
-      return this.renderDay();
+      return this.renderDay(events);
     } else {
       console.error(
         'Attempting to render unsupported calendar type ' + this.props.type
