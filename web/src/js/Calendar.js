@@ -69,17 +69,16 @@ var Calendar = React.createClass({
 
   renderDay: function(events) {
     var dayRange = DateUtil.getDay();
-    var eventBlocks = [];
-    _.each(events, function(event) {
-      if (dayRange.overlaps(event.range)) {
+    var eventBlocks = _.map(
+      _.filter(events, function(event) {
+        return dayRange.overlaps(event.range);
+      }),
+      function(event) {
         var intersectingEvent = {
           range: dayRange.intersect(event.range),
           text: event.name,
         };
-        eventBlocks.push(
-          <EventBlock event={intersectingEvent} range={dayRange} />
-        );
-      }
+        return <EventBlock event={intersectingEvent} range={dayRange} />;
     });
 
     return (
@@ -103,18 +102,17 @@ var Calendar = React.createClass({
     var range = DateUtil.getWeek();
     var cells = [];
     range.by('days', function(day) {
-      var eventBlocks = [];
       var dayRange = moment().range(day, moment(day).add(1, 'days'));
-      _.each(events, function(event) {
-        if (dayRange.overlaps(event.range)) {
+      var eventBlocks = _.map(
+        _.filter(events, function(event) {
+          return dayRange.overlaps(event.range);
+        }),
+        function(event) {
           var intersectingEvent = {
             range: dayRange.intersect(event.range),
             text: event.name,
           };
-          eventBlocks.push(
-            <EventBlock event={intersectingEvent} range={dayRange} />
-          );
-        }
+          return <EventBlock event={intersectingEvent} range={dayRange} />;
       });
 
       var isToday = day.date() === moment().date();
