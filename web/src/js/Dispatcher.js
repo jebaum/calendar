@@ -5,7 +5,6 @@ function Dispatcher() {
 
 Dispatcher.prototype = {
   register: function(action, callback) {
-    console.log('setting callback for ' + action);
     this.callbacks[action] = callback;
   },
 
