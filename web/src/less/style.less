@@ -60,9 +60,17 @@
       border: thin solid @grey-300;
       vertical-align: top;
       padding: 4px;
+      position: relative;
       display: inline-block;
       margin-top: -1px;
       margin-left: -1px;
+
+      .event-block {
+        background-color: @light-blue-200;
+        width: 90%;
+        position: absolute;
+        border: thin solid @grey-300;
+      }
     }
 
     .cell-today {
