@@ -1,11 +1,14 @@
 'use strict';
 
+var CalendarStore = require('./CalendarStore');
 var DateUtil = require('./DateUtil');
 var EventStore = require('./EventStore');
 var React = require('react');
 var Paper = require('material-ui').Paper;
 var PropTypes = require('react').PropTypes;
 var StateFromStore = require('./StateFromStore');
+var Toolbar = require('material-ui').Toolbar;
+var ToolbarGroup = require('material-ui').ToolbarGroup;
 var classSet = require('react/addons').addons.classSet;
 var moment = require('moment-range');
 var _ = require('underscore');
@@ -55,6 +58,18 @@ var EventBlock = React.createClass({
 
 var Calendar = React.createClass({
   mixins: [StateFromStore({
+    mode: {
+      store: CalendarStore,
+      fetch: function(store, fetchParams) {
+        return store.getMode();
+      }
+    },
+    date: {
+      store: CalendarStore,
+      fetch: function(store, fetchParams) {
+        return store.getDate();
+      }
+    },
     events: {
       store: EventStore,
       fetch: function(store, fetchParams) {
@@ -67,8 +82,14 @@ var Calendar = React.createClass({
     type: PropTypes.oneOf(['day', 'week', 'month', 'year']),
   },
 
-  renderDay: function(events) {
-    var dayRange = DateUtil.getDay();
+  getInitialState: function() {
+    return {
+
+    };
+  },
+
+  renderDay: function(events, date) {
+    var dayRange = DateUtil.getDay(date);
     var eventBlocks = _.map(
       _.filter(events, function(event) {
         return dayRange.overlaps(event.range);
@@ -83,7 +104,7 @@ var Calendar = React.createClass({
 
     return (
       <div>
-        <h1>{moment().format('dddd, MMMM Do')}</h1>
+        <h1>{date.format('dddd, MMMM Do')}</h1>
         <div className="calendar-wrapper calendar-wrapper-day">
           <Paper rounded={false}>
             <div className="calendar">
@@ -98,8 +119,8 @@ var Calendar = React.createClass({
     );
   },
 
-  renderWeek: function(events) {
-    var range = DateUtil.getWeek();
+  renderWeek: function(events, date) {
+    var range = DateUtil.getWeek(date);
     var cells = [];
     range.by('days', function(day) {
       var dayRange = moment().range(day, moment(day).add(1, 'days'));
@@ -140,8 +161,8 @@ var Calendar = React.createClass({
     );
   },
 
-  renderMonth: function(events) {
-    var range = DateUtil.getMonth();
+  renderMonth: function(events, date) {
+    var range = DateUtil.getMonth(date);
     var fullRange = moment().range(
       range.start.startOf('week'),
       range.end.endOf('week')
@@ -150,8 +171,9 @@ var Calendar = React.createClass({
     var cells = [];
     var i = 0;
     fullRange.by('day', function(day) {
-      var isToday = day.date() === moment().date();
-      var isDisabled = day.month() !== moment().month();
+      var isToday =
+        (day.date() === moment().date() && day.month() === moment().month());
+      var isDisabled = day.month() !== date.month();
       var key = '' + day.date() + '-' + day.month();
       cells.push((
         <Cell today={isToday} disabled={isDisabled} key={key}>
@@ -167,7 +189,7 @@ var Calendar = React.createClass({
 
     return (
       <div>
-        <h1>{moment().format('MMMM')}</h1>
+        <h1>{date.format('MMMM')}</h1>
         <div className="calendar-wrapper calendar-wrapper-month">
           <Paper rounded={false}>
             <div className="calendar">
@@ -180,17 +202,20 @@ var Calendar = React.createClass({
   },
 
   render: function() {
+    var mode = this.state.mode;
     var events = this.state.events;
-    if (this.props.type === 'month') {
-      return this.renderMonth(events);
-    } else if (this.props.type === 'week') {
-      return this.renderWeek(events);
-    } else if (this.props.type === 'day') {
-      return this.renderDay(events);
-    } else {
-      console.error(
-        'Attempting to render unsupported calendar type ' + this.props.type
-      );
+    var date = this.state.date;
+    switch (mode) {
+      case 'month':
+        return this.renderMonth(events, date);
+      case 'week':
+        return this.renderWeek(events, date);
+      case 'day':
+        return this.renderDay(events, date);
+      default:
+        return console.error(
+          'Attempting to render unsupported calendar mode ' + mode
+        );
     }
   }
 });

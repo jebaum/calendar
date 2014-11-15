@@ -1,30 +1,48 @@
 var API = require('./API');
 var DateUtil = require('./DateUtil');
 var Dispatcher = require('./Dispatcher');
+var moment = require('moment-range');
 var _ = require('underscore');
 
 function CalendarStore() {
-  this.text = 'sample text';
-  this.title = 'month';
+  this.mode = 'month';
+  this.date = moment();
   this.listeners = [];
 }
 
 CalendarStore.prototype = {
-  getText: function() {
-    return this.text;
+  getMode: function() {
+    return this.mode;
   },
 
-  setText: function(t) {
-    this.text = t;
+  setMode: function(m) {
+    this.mode = m;
     this.notify();
   },
 
-  getTitle: function() {
-    return this.title;
+  getDate: function() {
+    return this.date;
   },
 
-  setTitle: function(t) {
-    this.title = t;
+  setDate: function(d) {
+    this.date = d;
+    this.notify();
+  },
+
+  modifyDate: function(delta) {
+    switch (this.mode) {
+      case 'month':
+        this.date.add(delta, 'months');
+        break;
+      case 'week':
+        this.date.add(delta, 'weeks');
+        break;
+      case 'day':
+        this.date.add(delta, 'days');
+        break;
+      default:
+        console.error('attempt to modify date with mode %s', this.mode);
+    }
     this.notify();
   },
 
@@ -40,6 +58,13 @@ CalendarStore.prototype = {
 }
 
 var calendarStore = new CalendarStore();
-Dispatcher.register('SET_CALENDAR', calendarStore.setTitle.bind(calendarStore));
+Dispatcher.register('SET_CALENDAR', calendarStore.setMode.bind(calendarStore));
+Dispatcher.register('SET_DATE', calendarStore.setDate.bind(calendarStore));
+Dispatcher.register('SET_DATE_FORWARD', function() {
+  calendarStore.modifyDate(1);
+});
+Dispatcher.register('SET_DATE_BACKWARD', function() {
+  calendarStore.modifyDate(-1);
+});
 
 module.exports = calendarStore;

@@ -9,18 +9,11 @@
       @subNavWidth: (@desktop-keyline-increment * 4);
       .lh-calc(min-height, ~'100% - @{app-bar-height}');
 
-      .subNav {
-        position: absolute;
-        width: @subNavWidth;
-      }
-
       .subContent {
         max-width: (@desktop-keyline-increment * 14);
         height: 100%;
-        margin-left: @subNavWidth;
         .lh-calc(width, ~'100% - @{subNavWidth}');
         padding: @desktop-gutter;
-        border-left: solid 1px @grey-300;
       }
     }
   }
@@ -81,4 +74,8 @@
       color: @grey-300;
     }
   }
+}
+
+.mui-toolbar .mui-toolbar-group .mui-paper-button {
+  top: 8px;
 }

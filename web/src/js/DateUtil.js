@@ -1,31 +1,35 @@
 var moment = require('moment-range');
 
 var DateUtil = {
-  getYear: function() {
+  getYear: function(date) {
+    date = date || moment();
     return moment().range(
-      moment().startOf('year'),
-      moment().endOf('year')
+      moment(date).startOf('year'),
+      moment(date).endOf('year')
     );
   },
 
-  getMonth: function() {
+  getMonth: function(date) {
+    date = date || moment();
     return moment().range(
-      moment().startOf('month'),
-      moment().endOf('month')
+      moment(date).startOf('month'),
+      moment(date).endOf('month')
     );
   },
 
-  getWeek: function() {
+  getWeek: function(date) {
+    date = date || moment();
     return moment().range(
-      moment().startOf('week'),
-      moment().endOf('week')
+      moment(date).startOf('week'),
+      moment(date).endOf('week')
     );
   },
 
-  getDay: function() {
+  getDay: function(date) {
+    date = date || moment();
     return moment().range(
-      moment().startOf('day'),
-      moment().endOf('day')
+      moment(date).startOf('day'),
+      moment(date).endOf('day')
     );
   }
 }
