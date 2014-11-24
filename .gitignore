@@ -7,3 +7,4 @@ build
 .recommenders
 venv
 __pycache__
+*.pyc
