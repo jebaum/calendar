@@ -268,6 +268,10 @@ class CursesView():
                 self.offset = max(0,self.offset)
                 self.stdscr.clear()
                 self.stdscr.refresh()
+            # move cursor for mac os x
+            curses.setsyx(0,0)
+            curses.doupdate()
+            time.sleep(0.01)
 
 if __name__ == '__main__':
     # if len(sys.argv) < 3:
