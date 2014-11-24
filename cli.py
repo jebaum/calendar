@@ -1,5 +1,9 @@
 from cli import *
 
+nd = NcursesDisplay()
+nd.display()
+
+"""
 if __name__ == '__main__':
     # if len(sys.argv) < 3:
     #     print("Usage: python cli.py <start> <end>")
@@ -19,3 +23,4 @@ if __name__ == '__main__':
 
     # events = get_events(sys.argv[1], sys.argv[2])
     display_daily_term(events)
+"""
