@@ -40,21 +40,11 @@ class Event(object):
     def year(self):
         return self.startDate.year
 
-    def clamp_seconds_since_epoch(self, sec):
-        sec_string = str(sec)
-        if len(sec_string) > 10:
-            return int(sec_string[:10])
-        elif len(sec_string) < 10:
-            return int(sec_string.ljust(10, '0'))
-        return sec_string
-
     def load_from_json(self, json_dict):
         for k,v in json_dict.items():
             setattr(self, k, v)
 
-        # Adjust startTime / endTime to ensure in seconds since epoch
-        self.startTime = self.clamp_seconds_since_epoch(self.startTime)
-        self.endTime = self.clamp_seconds_since_epoch(self.endTime)
-
-        self.startDate = datetime.datetime.fromtimestamp(self.startTime)
-        self.endDate = datetime.datetime.fromtimestamp(self.endTime)
+        # Create datetime objects from seconds from epoch
+        # Must convert miliseconds since epoch (standard of api) to seconds first
+        self.startDate = datetime.datetime.fromtimestamp(self.startTime/1000)
+        self.endDate = datetime.datetime.fromtimestamp(self.endTime/1000)
