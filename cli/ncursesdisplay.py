@@ -1,6 +1,8 @@
 import sys
 import curses
 import traceback
+import time
+from .cursesinterface import *
 
 class NcursesDisplay:
   def __init__(self):
@@ -29,11 +31,33 @@ class NcursesDisplay:
 
   def display(self):
     try:
-        self.setup_curses()
-        self.cleanup_curses()
+      self.setup_curses()
+
+      self.scrollableTest = ScrollableCursesInterface()
+      self.scrollableTest.set_view_position(10,10)
+      self.scrollableTest.set_view_size(50,50)
+
+      while True:
+        self.scrollableTest.display()
+        
+        c = self.stdscr.getch()
+        if c == ord('q'):
+          # Exit
+          break
+        # WASD Scrolling
+        elif c == ord('a'):
+          self.scrollableTest.scroll_x(-1)
+        elif c == ord('d'):
+          self.scrollableTest.scroll_x(1)
+        elif c == ord('s'):
+          self.scrollableTest.scroll_y(1)
+        elif c == ord('w'):
+          self.scrollableTest.scroll_y(-1)
+
+      self.cleanup_curses()
     except Exception as e:
-        # Safely exit on exception rather than damage terminal text rendering
-        self.cleanup_curses()
-        print(e)
-        traceback.print_exc()
-        sys.exit(1)
+      # Safely exit on exception rather than damage terminal text rendering
+      self.cleanup_curses()
+      print(e)
+      traceback.print_exc()
+      sys.exit(1)
