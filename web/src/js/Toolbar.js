@@ -7,6 +7,7 @@ var Toolbar = require('material-ui').Toolbar;
 var ToolbarGroup = require('material-ui').ToolbarGroup;
 
 var AppToolbar = React.createClass({
+
   onChange: function(e, index, item) {
     Actions.setCalendar(item.value);
   },
@@ -23,16 +24,14 @@ var AppToolbar = React.createClass({
     var groupItems = [
       <Icon icon="navigation-chevron-left" onClick={Actions.setDateBackward} />,
       <Icon icon="navigation-chevron-right" onClick={Actions.setDateForward} />,
-      <PaperButton label="Today" onClick={Actions.setDate}/>,
+      <PaperButton label="Today" type="FLAT" onClick={Actions.setDate}/>,
     ];
     var groups = [
       <ToolbarGroup float="left" groupItems={[modeMenu]} />,
       <ToolbarGroup float="right" groupItems={groupItems} />,
     ];
 
-    return (
-      <Toolbar groups={groups} />
-    );
+    return <Toolbar groups={groups} />;
   }
 })
 
