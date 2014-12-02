@@ -9,18 +9,14 @@ class ScrollableCursesInterface:
   """
 
   def __init__(self):
+    self.pad = curses.newpad(10,10)
+
     self.set_view_position(0,0)
     self.set_view_size(0,0)
     self.set_content_position(0,0)
     self.set_content_size(100,100)
 
-    self.pad = curses.newpad(self.content_w,self.content_h)
-    for x in range(0, self.content_w-1, 10):
-      self.pad.addstr(0,x,str(x))
-    for y in range(1, self.content_h-1):
-      self.pad.addstr(y,0,str(y))
-      for x in range(3, self.content_w-1):
-        self.pad.addch(y,x, ord('a') + (x*x+y*y) % 26)
+    self.needs_update = True
 
   def set_view_position(self, x, y):
     self.view_x = x
@@ -38,6 +34,8 @@ class ScrollableCursesInterface:
   def set_content_size(self, w, h):
     self.content_w = w
     self.content_h = h
+    self.pad.resize(h,w)
+    self.needs_update = True
 
   def scroll_x(self, amount):
     self.content_x += amount
@@ -57,11 +55,58 @@ class ScrollableCursesInterface:
     if self.content_y > self.content_h-self.view_h:
       self.content_y = self.content_h-self.view_h
 
+  def update(self):
+    # Stub 
+    for x in range(0, self.content_w-1, 10):
+      self.pad.addstr(0,x,str(x))
+    for y in range(1, self.content_h-1):
+      self.pad.addstr(y,0,str(y))
+      for x in range(3, self.content_w-1):
+        self.pad.addch(y,x, ord('a') + (x*x+y*y) % 26)
+    self.needs_update = False
 
   def display(self):
+    if self.needs_update:
+      self.update()
+
     # Refresh the pad
     # render top left corner of content into view rectangle
     # args 1,2 are y,x for top left corner of pad
     # args 3,4 are top left corner of terminal window rectangle to render into
     # args 5,6 are bottom right corner of terminal window rectangle to render into
     self.pad.refresh(self.content_y,self.content_x, self.view_y,self.view_x, self.view_y+self.view_h, self.view_x+self.view_w)
+
+class DailyView(ScrollableCursesInterface):
+  def update(self):
+    for x in range(0, self.content_w-1, 10):
+      self.pad.addstr(0,x,str(x))
+    for y in range(1, self.content_h-1):
+      self.pad.addstr(y,0,str(y))
+      for x in range(3, self.content_w-1):
+        self.pad.addch(y,x, ord('a') + (x*x+y*y) % 5)
+
+    self.needs_update = False
+
+class SummaryView(ScrollableCursesInterface):
+  def update(self):
+    for x in range(0, self.content_w-1, 10):
+      self.pad.addstr(0,x,str(x))
+    for y in range(1, self.content_h-1):
+      self.pad.addstr(y,0,str(y))
+      for x in range(3, self.content_w-1):
+        self.pad.addch(y,x, ord('a') + (x*x+y*y) % 10)
+
+    self.needs_update = False
+
+
+
+
+
+
+
+
+
+
+
+
+

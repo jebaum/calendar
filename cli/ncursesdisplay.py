@@ -33,12 +33,13 @@ class NcursesDisplay:
     try:
       self.setup_curses()
 
-      self.scrollableTest = ScrollableCursesInterface()
-      self.scrollableTest.set_view_position(10,10)
-      self.scrollableTest.set_view_size(50,50)
+      self.DailyView = DailyView()
+      self.SummaryView = SummaryView()
+      self.resize_views()
 
       while True:
-        self.scrollableTest.display()
+        self.DailyView.display()
+        # self.SummaryView.display()
         
         c = self.stdscr.getch()
         if c == ord('q'):
@@ -54,6 +55,10 @@ class NcursesDisplay:
         elif c == ord('w'):
           self.scrollableTest.scroll_y(-1)
 
+        if c == curses.KEY_RESIZE:
+          self.h, self.w = self.stdscr.getmaxyx()
+          self.resize_views()
+
       self.cleanup_curses()
     except Exception as e:
       # Safely exit on exception rather than damage terminal text rendering
@@ -61,3 +66,13 @@ class NcursesDisplay:
       print(e)
       traceback.print_exc()
       sys.exit(1)
+
+  def resize_views(self):
+      self.DailyView.pad.addstr(0,0,str(self.w))
+      self.DailyView.set_view_position(0,0)
+      self.DailyView.set_view_size(self.w-1,(self.h-1)*2/3)
+      self.DailyView.set_content_size(self.w-1,(self.h-1)*2/3)
+
+      self.SummaryView.set_view_position(0,(self.h-1)*2/3+1)
+      self.SummaryView.set_view_size(self.w-1,(self.h-1)*1/3-1)
+      self.SummaryView.set_content_size(self.w-1,(self.h-1)*2/3)
