@@ -2,7 +2,15 @@ import sys
 import curses
 import traceback
 import time
+import signal
 from .cursesinterface import *
+
+global resize_flag
+def handle_sigwinch(signum, frame):
+  global resize_flag
+  resize_flag = True
+
+signal.signal(signal.SIGWINCH, handle_sigwinch)
 
 class NcursesDisplay:
   def __init__(self):
@@ -23,6 +31,9 @@ class NcursesDisplay:
     if curses.tigetstr("cnorm"):
       curses.curs_set(0)
 
+    global resize_flag
+    resize_flag = False
+
   def cleanup_curses(self):
     # End curses session to prevent window from breaking on error
     curses.nocbreak()
@@ -35,13 +46,27 @@ class NcursesDisplay:
 
       self.DailyView = DailyView()
       self.SummaryView = SummaryView()
+      self.CommandView = CommandView()
       self.resize_views()
+
+      self.DailyView.display()
+      self.SummaryView.display()
+      self.CommandView.display()
+
+      global resize_flag
 
       while True:
         self.DailyView.display()
-        # self.SummaryView.display()
+        self.SummaryView.display()
+        self.CommandView.display()
         
         c = self.stdscr.getch()
+
+        if c == curses.KEY_RESIZE or resize_flag:
+          self.cleanup_curses()
+          self.setup_curses()
+          self.resize_views()
+
         if c == ord('q'):
           # Exit
           break
@@ -55,10 +80,6 @@ class NcursesDisplay:
         elif c == ord('w'):
           self.scrollableTest.scroll_y(-1)
 
-        if c == curses.KEY_RESIZE:
-          self.h, self.w = self.stdscr.getmaxyx()
-          self.resize_views()
-
       self.cleanup_curses()
     except Exception as e:
       # Safely exit on exception rather than damage terminal text rendering
@@ -70,9 +91,13 @@ class NcursesDisplay:
   def resize_views(self):
       self.DailyView.pad.addstr(0,0,str(self.w))
       self.DailyView.set_view_position(0,0)
-      self.DailyView.set_view_size(self.w-1,(self.h-1)*2/3)
-      self.DailyView.set_content_size(self.w-1,(self.h-1)*2/3)
+      self.DailyView.set_view_size(self.w-1,self.h*2/3-1)
+      self.DailyView.set_content_size(self.w,self.h)
 
-      self.SummaryView.set_view_position(0,(self.h-1)*2/3+1)
-      self.SummaryView.set_view_size(self.w-1,(self.h-1)*1/3-1)
-      self.SummaryView.set_content_size(self.w-1,(self.h-1)*2/3)
+      self.SummaryView.set_view_position(0,self.DailyView.view_h+1)
+      self.SummaryView.set_view_size(self.w-1,self.h-self.DailyView.view_h-3)
+      self.SummaryView.set_content_size(self.w,(self.h-1)*2/3)
+
+      self.CommandView.set_view_position(0,self.h-1)
+      self.CommandView.set_view_size(self.w-1,1)
+      self.CommandView.set_content_size(self.w,1)
