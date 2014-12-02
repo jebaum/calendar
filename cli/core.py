@@ -18,17 +18,6 @@ def get_events(startTime, endTime):
 
     return events
 
-def get_events_file(filename):
-    events = []
-    with open(filename, 'r') as f:
-        j = json.load(f)
-        for event in j:
-            e = Event()
-            e.load_from_json(event)
-            events.append(e)
-
-    return events
-
 def display_daily_term(all_events):
     """
     Display today's events, printed to stdout

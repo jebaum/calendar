@@ -3,6 +3,10 @@ from cli import *
 nd = NcursesDisplay()
 nd.display()
 
+es = EventStore()
+es.get_events()
+print(es.get_events())
+
 """
 if __name__ == '__main__':
     # if len(sys.argv) < 3:

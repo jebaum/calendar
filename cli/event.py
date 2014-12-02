@@ -1,4 +1,4 @@
-import datetime
+import json, datetime
 
 class Event(object):
     def __init__(self):
@@ -18,7 +18,7 @@ class Event(object):
         for k in self.json_keys:
             json_dict[k] = getattr(self, k)
 
-        return json.dumps(json_dict)
+        return json.dumps(json_dict, sort_keys=True, indent=4, separators=(',', ': '))
 
     @property
     def minute(self):
