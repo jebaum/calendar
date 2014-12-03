@@ -10,6 +10,7 @@ class ListView(ScrollableView):
       self.event_lists.append([])
 
     self.box_header_width = 0
+    self.view_header = ""
 
   def set_content_size(self, w, h):
     # Width defined by argument
@@ -35,6 +36,7 @@ class ListView(ScrollableView):
 
   def update(self):
     self.draw_top_border()
+    self.draw_view_header()
 
     yoff = 1
     l = len(self.event_lists)
@@ -70,6 +72,9 @@ class ListView(ScrollableView):
       self.pad.addstr(y,x+1, str(e.hour).rjust(2,'0') + ":" + str(e.minute).rjust(2,'0'))
       self.pad.addstr(y,x+7,str(e.title))
       self.pad.addstr(y+1,x+7,str(e.description))
+
+  def draw_view_header(self):
+    self.pad.addstr(0,3,self.view_header)
 
   #
   # BORDER FUNCTIONS
