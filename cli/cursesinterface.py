@@ -1,6 +1,6 @@
 import curses
 
-class ScrollableCursesInterface:
+class ScrollableCursesInterface(object):
   """
   The "view" is a rectangular section of the terminal window that the contents
   will be displayed into.The "content" rectangle may be any size, and will
@@ -105,7 +105,57 @@ class CommandView(ScrollableCursesInterface):
 
     self.needs_update = False
 
+class ListView(ScrollableCursesInterface):
+  def __init__(self):
+    self.list_size = 20
+    super(ListView, self).__init__()
 
+  def set_content_size(self, w, h):
+    self.content_w = w
+    self.content_h = self.list_size * 4 + 1
+    self.pad.resize(self.content_h,self.content_w+1)
+    self.needs_update = True
+
+  def draw_box(self, y, h):
+    # Right vertical line
+    for i in range(h):
+      self.pad.addch(y+i,0,curses.ACS_VLINE)
+    # Left vertical line
+    for i in range(h):
+      self.pad.addch(y+i, self.content_w-1,curses.ACS_VLINE)
+
+  def draw_separator(self,y):
+    self.pad.addch(y,0,curses.ACS_LTEE)
+    self.pad.addch(y,self.content_w-1,curses.ACS_RTEE)
+    for i in range(1,self.content_w-1):
+      self.pad.addch(y,i,curses.ACS_HLINE)
+
+  def draw_top_border(self):
+    y = 0
+    self.pad.addch(y,0,curses.ACS_ULCORNER)
+    self.pad.addch(y,self.content_w-1,curses.ACS_URCORNER)
+    for i in range(1,self.content_w-1):
+      self.pad.addch(y,i,curses.ACS_HLINE)
+
+  def draw_bottom_border(self):
+    y = self.content_h-1
+    self.pad.addch(y,0,curses.ACS_LLCORNER)
+    self.pad.addch(y,self.content_w-1,curses.ACS_LRCORNER)
+    for i in range(1,self.content_w-1):
+      self.pad.addch(y,i,curses.ACS_HLINE)
+
+  def update(self):
+    self.draw_top_border()
+
+    yoff = 1
+    for b in range(self.list_size):
+      self.draw_box(b*4+yoff,3)
+      if b != self.list_size-1:
+        self.draw_separator(b*4+yoff+3)
+
+    self.draw_bottom_border()
+
+    self.needs_update = False
 
 
 

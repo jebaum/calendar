@@ -44,19 +44,19 @@ class NcursesDisplay:
     try:
       self.setup_curses()
 
-      self.DailyView = DailyView()
+      self.ListView = ListView()
       self.SummaryView = SummaryView()
       self.CommandView = CommandView()
       self.resize_views()
 
-      self.DailyView.display()
+      self.ListView.display()
       self.SummaryView.display()
       self.CommandView.display()
 
       global resize_flag
 
       while True:
-        self.DailyView.display()
+        self.ListView.display()
         self.SummaryView.display()
         self.CommandView.display()
         
@@ -72,13 +72,13 @@ class NcursesDisplay:
           break
         # WASD Scrolling
         elif c == ord('a'):
-          self.scrollableTest.scroll_x(-1)
+          self.ListView.scroll_x(-1)
         elif c == ord('d'):
-          self.scrollableTest.scroll_x(1)
+          self.ListView.scroll_x(1)
         elif c == ord('s'):
-          self.scrollableTest.scroll_y(1)
+          self.ListView.scroll_y(1)
         elif c == ord('w'):
-          self.scrollableTest.scroll_y(-1)
+          self.ListView.scroll_y(-1)
 
       self.cleanup_curses()
     except Exception as e:
@@ -89,13 +89,12 @@ class NcursesDisplay:
       sys.exit(1)
 
   def resize_views(self):
-      self.DailyView.pad.addstr(0,0,str(self.w))
-      self.DailyView.set_view_position(0,0)
-      self.DailyView.set_view_size(self.w-1,self.h*2/3-1)
-      self.DailyView.set_content_size(self.w,self.h)
+      self.ListView.set_view_position(0,0)
+      self.ListView.set_view_size(self.w-1,self.h*2/3-1)
+      self.ListView.set_content_size(self.w,self.h)
 
-      self.SummaryView.set_view_position(0,self.DailyView.view_h+1)
-      self.SummaryView.set_view_size(self.w-1,self.h-self.DailyView.view_h-3)
+      self.SummaryView.set_view_position(0,self.ListView.view_h+1)
+      self.SummaryView.set_view_size(self.w-1,self.h-self.ListView.view_h-3)
       self.SummaryView.set_content_size(self.w,(self.h-1)*2/3)
 
       self.CommandView.set_view_position(0,self.h-1)
