@@ -10,3 +10,8 @@ class DailyView(ListView):
       self.event_lists.append([])
 
     self.EventStore = EventStore
+
+    self.box_header_width = 5
+
+  def draw_box_header(self,y):
+    self.pad.addstr(y,1,str(y).rjust(self.box_header_width))

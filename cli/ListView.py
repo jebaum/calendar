@@ -9,6 +9,8 @@ class ListView(ScrollableView):
     for i in range(20):
       self.event_lists.append([])
 
+    self.box_header_width = 0
+
   def set_content_size(self, w, h):
     self.content_w = w
     self.content_h = 1 + len(self.event_lists) + sum([self.height_for_event_list(x) for x in self.event_lists])
@@ -28,6 +30,10 @@ class ListView(ScrollableView):
 
   def draw_box(self, y, events):
     h = self.height_for_event_list(events)
+    xoff = self.box_header_width + 1
+    
+    # Draw header
+    self.draw_box_header(y)
 
     # Right vertical line
     for i in range(h):
@@ -40,9 +46,12 @@ class ListView(ScrollableView):
     for i in range(len(events)):
       e = events[i]
       # Start time 
-      self.pad.addstr(y+i*2,1, str(e.hour).rjust(2,'0') + ":" + str(e.minute).rjust(2,'0'))
-      self.pad.addstr(y+i*2,7,str(e.title))
-      self.pad.addstr(y+1+i*2,7,str(e.description))
+      self.pad.addstr(y+i*2,xoff+1, str(e.hour).rjust(2,'0') + ":" + str(e.minute).rjust(2,'0'))
+      self.pad.addstr(y+i*2,xoff+7,str(e.title))
+      self.pad.addstr(y+1+i*2,xoff+7,str(e.description))
+
+  def draw_box_header(self,y):
+    pass
 
   def draw_separator(self,y):
     self.pad.addch(y,0,curses.ACS_LTEE)
