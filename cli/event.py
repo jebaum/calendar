@@ -24,24 +24,44 @@ class Event(object):
         return json.dumps(json_dict, sort_keys=True, indent=4, separators=(',', ': '))
 
     @property
-    def minute(self):
+    def startMinute(self):
         return self.startDate.minute
 
     @property
-    def hour(self):
+    def startHour(self):
         return self.startDate.hour
 
     @property
-    def day(self):
+    def startDay(self):
         return self.startDate.day
 
     @property
-    def month(self):
+    def startMonth(self):
         return self.startDate.month
 
     @property
-    def year(self):
+    def startYear(self):
         return self.startDate.year
+
+    @property
+    def endMinute(self):
+        return self.endDate.minute
+
+    @property
+    def endHour(self):
+        return self.endDate.hour
+
+    @property
+    def endDay(self):
+        return self.endDate.day
+
+    @property
+    def endMonth(self):
+        return self.endDate.month
+
+    @property
+    def endYear(self):
+        return self.endDate.year
 
     def load_from_json(self, json_dict):
         for k,v in json_dict.items():

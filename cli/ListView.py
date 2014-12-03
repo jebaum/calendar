@@ -69,9 +69,32 @@ class ListView(ScrollableView):
     pass
 
   def draw_event(self,y,x,e):
-      self.pad.addstr(y,x+1, str(e.hour).rjust(2,'0') + ":" + str(e.minute).rjust(2,'0'))
-      self.pad.addstr(y,x+7,str(e.title))
-      self.pad.addstr(y+1,x+7,str(e.description))
+    # [startTime - endTime] [title] [(category)] [@location]
+    #                       [description]
+    startTimeStr = str(e.startHour).rjust(2,'0') + ":" + str(e.startMinute).rjust(2,'0')
+    endTimeStr = str(e.endHour).rjust(2,'0') + ":" + str(e.endMinute).rjust(2,'0')
+    timeStr = "%s - %s" % (startTimeStr, endTimeStr)
+
+    # Start - End
+    xoff = x
+    self.pad.addstr(y,xoff+1, timeStr)
+    xoff += len(timeStr)+2
+
+    # Title, Description
+    titleStr = str(e.title)
+    descriptionStr = str(e.description)
+    self.pad.addstr(y,xoff,titleStr)
+    self.pad.addstr(y+1,xoff,descriptionStr)
+
+    # Category
+    xoff += len(titleStr)+1
+    categoryStr = "(%s)" % (e.category)
+    self.pad.addstr(y,xoff,categoryStr)
+
+    # Location
+    xoff += len(categoryStr)+1
+    locationStr = "@%s" % (e.location)
+    self.pad.addstr(y,xoff,locationStr)
 
   def draw_view_header(self):
     self.pad.addstr(0,3,self.view_header)
