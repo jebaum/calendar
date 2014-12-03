@@ -54,8 +54,8 @@ class ScrollableView(object):
     # Clamp to min / max
     if self.content_y < 0:
       self.content_y = 0
-    if self.content_y > self.content_h-self.view_h:
-      self.content_y = self.content_h-self.view_h
+    if self.content_y > self.content_h-self.view_h-1:
+      self.content_y = self.content_h-self.view_h-1
 
     self.needs_update = True
 

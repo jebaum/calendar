@@ -9,7 +9,7 @@ class ListView(ScrollableView):
 
   def set_content_size(self, w, h):
     self.content_w = w
-    self.content_h = self.list_size * sum(self.box_heights) + 1
+    self.content_h = sum(self.box_heights) + 1 + self.list_size*1
     self.pad.resize(self.content_h,self.content_w+1)
     self.needs_update = True
 
@@ -58,6 +58,6 @@ class ListView(ScrollableView):
       self.draw_box(yoff,self.box_heights[i],i)
       if i != self.list_size-1:
         self.draw_separator(yoff+self.box_heights[i])
-      yoff += self.box_heights[i]+2
+      yoff += self.box_heights[i]+1
 
     self.draw_bottom_border()
