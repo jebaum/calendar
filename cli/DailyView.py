@@ -15,7 +15,12 @@ class DailyView(TimeView,ListView):
     self.EventStore = EventStore
 
     self.box_header_width = 5
-    self.view_header = "Today"
+    # self.view_header = "Today"
+    self.view_header = self.get_view_header()
 
   def draw_box_header(self,y):
     self.pad.addstr(y,1,str(y).rjust(self.box_header_width))
+
+  def update(self):
+    self.view_header = self.get_view_header()
+    super(DailyView, self).update()

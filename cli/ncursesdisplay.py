@@ -83,9 +83,11 @@ class NcursesDisplay:
           break
         # WASD Scrolling
         elif c == ord('a'):
-          self.DailyView.scroll_x(-1)
+          # self.DailyView.scroll_x(-1)
+          self.DailyView.change_time_period(-1)
         elif c == ord('d'):
-          self.DailyView.scroll_x(1)
+          # self.DailyView.scroll_x(1)
+          self.DailyView.change_time_period(1)
         elif c == ord('s'):
           self.DailyView.scroll_y(1)
         elif c == ord('w'):

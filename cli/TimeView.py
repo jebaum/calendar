@@ -8,7 +8,28 @@ class TimeView(ScrollableView):
   def __init__(self):
     super(TimeView, self).__init__()
     self.view_header = "Init"
-    self.get_month_period(datetime.datetime.now())
+
+    self.header_format = "%B %d %Y, %H:%M:%S"
+    self.periodSize = datetime.timedelta(days = 1)
+    self.periodOffset = 0
+
+  @property
+  def now(self):
+    return datetime.datetime.now()
+
+  def get_view_header(self):
+    return self.get_period()[0].strftime(self.header_format)
+
+  def get_period(self):
+    # Return period adjusted with self.periodOffset
+    start_dt,end_dt = self.get_day_period(self.now)
+    start_dt += self.periodOffset*self.periodSize
+    end_dt += self.periodOffset*self.periodSize
+    return (start_dt,end_dt)
+
+  def change_time_period(self, amount):
+    self.periodOffset += amount
+    self.needs_update = True
 
   def get_day_period(self, dt):
     # 00:00 to 24:00
