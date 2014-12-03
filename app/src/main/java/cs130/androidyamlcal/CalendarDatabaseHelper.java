@@ -25,6 +25,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	public static final String EVENT_CATEGORY = "category";
 	public static final String EVENT_START_TIME = "start_time";
 	public static final String EVENT_END_TIME = "end_time";
+	public static final String EVENT_IS_CACHED = "is_cached";
 	private static final String SESSION = "Session";
 	private static final String SESSION_OFFLINE = "offline";
 	private static final String SESSION_ADDRESS = "address";
@@ -40,9 +41,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	{
 		Log.d(TAG, "creating tables");
 		db.execSQL("CREATE TABLE Session(" +
-				SESSION_OFFLINE + " BOOLEAN, " +
 				SESSION_ADDRESS + " VARCHAR(100), PRIMARY KEY(" +
-					SESSION_OFFLINE + "," +
 					SESSION_ADDRESS +"))"
 		);
 		db.execSQL("CREATE TABLE " + EVENT + "(" +
@@ -51,16 +50,18 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 				EVENT_DESCRIPTION + " VARCHAR(500), " +
 				EVENT_CATEGORY + " VARCHAR(50), " +
 				EVENT_START_TIME + " INTEGER, " +
-				EVENT_END_TIME + " INTEGER, PRIMARY KEY(" +
+				EVENT_END_TIME + " INTEGER, " +
+				EVENT_IS_CACHED + " BOOLEAN, PRIMARY KEY(" +
 					EVENT_TITLE + "," +
 					EVENT_LOCATION + "," +
 					EVENT_DESCRIPTION + "," +
 					EVENT_CATEGORY + "," +
 					EVENT_START_TIME + "," +
-					EVENT_END_TIME + "))"
+					EVENT_END_TIME + "," +
+					EVENT_IS_CACHED + "))"
 		);
 		ContentValues cv = new ContentValues();
-		cv.put(SESSION_OFFLINE, false);
+		cv.put(SESSION_ADDRESS, "");
 		db.insert(SESSION, null, cv);
 	}
 
@@ -74,13 +75,14 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	{
 		SQLiteDatabase db = getWritableDatabase();
 		ContentValues cv = new ContentValues();
-		cv.put("title", event.getTitle());
-		cv.put("location", event.getLocation());
-		cv.put("description", event.getDescription());
-		cv.put("category", event.getCategory());
-		cv.put("start_time", event.getStartTime().getTime());
-		cv.put("end_time", event.getEndTime().getTime());
-		db.insert("Event", null, cv);
+		cv.put(EVENT_TITLE, event.getTitle());
+		cv.put(EVENT_LOCATION, event.getLocation());
+		cv.put(EVENT_DESCRIPTION, event.getDescription());
+		cv.put(EVENT_CATEGORY, event.getCategory());
+		cv.put(EVENT_START_TIME, event.getStartTime().getTime());
+		cv.put(EVENT_END_TIME, event.getEndTime().getTime());
+		cv.put(EVENT_IS_CACHED, event.isCached());
+		db.insert(EVENT, null, cv);
 	}
 
 	public ArrayList<Event> getEvents(Date date)
@@ -89,7 +91,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		Date today = new Date(date.getYear(), date.getMonth(), date.getDate(), 0, 0, 0);
 		Date tomorrow = new Date(date.getYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0);
 		SQLiteDatabase db = getReadableDatabase();
-		Cursor cursor = db.query("Event", null,
+		Cursor cursor = db.query(EVENT, null,
 			EVENT_START_TIME + " >= " + today.getTime() + " AND " + EVENT_START_TIME + " < " + tomorrow.getTime(),
 			null, null, null, null);
 
@@ -102,6 +104,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 			event.setCategory(cursor.getString(cursor.getColumnIndex(EVENT_CATEGORY)));
 			event.setStartTime(new Date(cursor.getInt(cursor.getColumnIndex(EVENT_START_TIME))));
 			event.setEndTime(new Date(cursor.getInt(cursor.getColumnIndex(EVENT_END_TIME))));
+			event.setCached(cursor.getShort(cursor.getColumnIndex(EVENT_IS_CACHED)) == 1);
 			events.add(event);
 		}
 		return events;
@@ -123,6 +126,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 					(EVENT_START_TIME))));
 			event.setStartTime(new Date(cursor.getLong(cursor.getColumnIndex(EVENT_START_TIME))));
 			event.setEndTime(new Date(cursor.getLong(cursor.getColumnIndex(EVENT_END_TIME))));
+			event.setCached(cursor.getShort(cursor.getColumnIndex(EVENT_IS_CACHED)) == 1);
 			events.add(event);
 		}
 		return events;
@@ -133,10 +137,9 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		return getReadableDatabase().delete(EVENT, null, null);
 	}
 
-	public int updateSession(boolean offline, String address)
+	public int updateSession(String address)
 	{
 		ContentValues cv = new ContentValues();
-		cv.put(SESSION_OFFLINE, offline);
 		cv.put(SESSION_ADDRESS, address);
 		return getWritableDatabase().update(SESSION, cv, null, null);
 	}
@@ -146,7 +149,6 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		Session session = new Session();
 		Cursor cursor = getReadableDatabase().query(SESSION, null, null, null, null, null, null);
 		cursor.moveToNext();
-		session.setOffline(cursor.getShort(cursor.getColumnIndex(SESSION_OFFLINE)) != 0);
 		session.setAddress(cursor.getString(cursor.getColumnIndex(SESSION_ADDRESS)));
 		return session;
 	}

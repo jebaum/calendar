@@ -5,5 +5,10 @@
     <item
         android:id="@+id/add_event"
         android:title="@string/add_event"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/offline"
+        android:title="@string/offline"
+        android:checkable="true"
+        app:showAsAction="never"/>
 </menu>

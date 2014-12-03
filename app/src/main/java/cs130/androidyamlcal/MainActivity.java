@@ -2,23 +2,19 @@ package cs130.androidyamlcal;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.CalendarView;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -27,55 +23,54 @@ import com.fasterxml.jackson.core.JsonToken;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 
 public class MainActivity extends ActionBarActivity
 {
 	private static final String TAG = "MainActivity";
-	private ArrayList<Event> _dayEvents = new ArrayList<Event>();
-	private EventAdapter _eventAdapter;
-	private CalendarView _calendarView;
+//	private ArrayList<Event> _dayEvents = new ArrayList<Event>();
+//	private EventAdapter _eventAdapter;
+//	private CalendarView _calendarView;
 	private View _newAddressDialogView;
-	private View _addEventDialogView;
+//	private View _addEventDialogView;
 	private Session _session;
 	private FetchEventsTask _fetchEventsTask;
 	private ProgressDialog _fetchProgressDialog;
 	private ProgressDialog _postProgressDialog;
 	private CalendarDatabaseHelper _calendarDatabaseHelper;
 	private PostEventTask _postEventTask;
+	private FragmentManager _fragmentManager;
+	private boolean _isOffline;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+
+		_isOffline = false;
+		setContentView(R.layout.activity_fragment);
+		_fragmentManager = getSupportFragmentManager();
+		Fragment fragment = getActiveFragment();
+
+		if (fragment == null)
+		{
+			fragment = new MonthViewFragment();
+			_fragmentManager.beginTransaction()
+					.add(android.R.id.content, fragment)
+					.commit();
+		}
+
 		_calendarDatabaseHelper = new CalendarDatabaseHelper(getApplicationContext());
 		_session = _calendarDatabaseHelper.getSession();
 
-		_eventAdapter = new EventAdapter(MainActivity.this, _dayEvents);
-		setContentView(R.layout.activity_main);
-		ListView eventsList = (ListView) findViewById(R.id.events_list);
-		eventsList.setAdapter(_eventAdapter);
-
-		_calendarView = (CalendarView) findViewById(R.id.calendar);
-		_calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener()
+		if (!_isOffline)
 		{
-			@Override
-			public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth)
-			{
-				updateEvents(year, month, dayOfMonth);
-			}
-		});
-
-		if (!_session.isOffline())
-		{
-			if (_session.getAddress() == null)
+			if (_session.getAddress().isEmpty())
 			{
 				createNewAddressDialog();
 			}
@@ -92,7 +87,6 @@ public class MainActivity extends ActionBarActivity
 	public void onResume()
 	{
 		super.onResume();
-
 	}
 
 	@Override
@@ -128,6 +122,11 @@ public class MainActivity extends ActionBarActivity
 				Intent i = new Intent(MainActivity.this, AddEventActivity.class);
 				startActivityForResult(i, 1);
 				return true;
+			case R.id.offline:
+				Log.d(TAG, "toggle offline");
+				_isOffline = !_isOffline;
+				item.setChecked(_isOffline);
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -149,13 +148,22 @@ public class MainActivity extends ActionBarActivity
 						.EVENT_START_TIME, 0)));
 				event.setEndTime(new Date(data.getLongExtra(CalendarDatabaseHelper.EVENT_END_TIME,
 						0)));
+				event.setCached(_isOffline);
 
 				DateFormat df = DateFormat.getDateTimeInstance();
 				Log.d(TAG, "new event start time: " + df.format(event.getStartTime()));
-				_postEventTask = new PostEventTask(event);
-				_postEventTask.execute();
-				showPostProgressDialog();
-				//_calendarDatabaseHelper.addEvent(event);/////
+
+				if (!_isOffline)
+				{
+					_postEventTask = new PostEventTask(event);
+					_postEventTask.execute();
+					showPostProgressDialog();
+				}
+				else
+				{
+					_calendarDatabaseHelper.addEvent(event);
+					((EventView) getActiveFragment()).updateEvents();
+				}
 			}
 			if (resultCode == RESULT_CANCELED)
 			{
@@ -163,6 +171,11 @@ public class MainActivity extends ActionBarActivity
 				//Write your code if there's no result
 			}
 		}
+	}
+
+	private Fragment getActiveFragment()
+	{
+		return _fragmentManager.findFragmentById(android.R.id.content);
 	}
 
 	private void showPostProgressDialog()
@@ -224,11 +237,10 @@ public class MainActivity extends ActionBarActivity
 		}
 	}
 
-	private void updateSession(boolean offline, String address)
+	private void updateSession(String address)
 	{
-		_session.setOffline(offline);
 		_session.setAddress(address);
-		_calendarDatabaseHelper.updateSession(offline, address);
+		_calendarDatabaseHelper.updateSession(address);
 	}
 
 	private void printEvents()
@@ -241,66 +253,9 @@ public class MainActivity extends ActionBarActivity
 					+ ", description: " + event.getDescription()
 					+ ", category: " + event.getCategory()
 					+ ", startTime: " + df.format(event.getStartTime())
-					+ ", endTime: " + df.format(event.getEndTime()));
+					+ ", endTime: " + df.format(event.getEndTime())
+					+ ", isCached: " + event.isCached());
 		}
-	}
-
-	private void updateEvents(int year, int month, int dayOfMonth)
-	{
-		Log.d(TAG, "selected date: year: " + String.valueOf(year) + ", month: "
-				+ String.valueOf(month) + ", dayOfMonth: " + String.valueOf(dayOfMonth));
-		_dayEvents.clear();
-		for (Event event : _calendarDatabaseHelper.getEvents())
-		{
-			Date startTime = event.getStartTime();
-			Log.d(TAG, "year: " + startTime.getYear()
-					+ ", month: " + startTime.getMonth()
-					+ ", dayOfMonth: " + startTime.getDate());
-			if (startTime.getDate() == dayOfMonth &&
-					startTime.getMonth() == month &&
-					startTime.getYear() + 1900 == year)
-			{
-				_dayEvents.add(event);
-			}
-		}
-		_eventAdapter.notifyDataSetChanged();
-	}
-
-	private void updateEvents()
-	{
-		Date selectedDate = new Date(_calendarView.getDate());
-		updateEvents(selectedDate.getYear() + 1900, selectedDate.getMonth(),
-				selectedDate.getDate());
-	}
-
-	private void createAddEventDialog()
-	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		// Get the layout inflater
-		LayoutInflater inflater = getLayoutInflater();
-
-		// Inflate and set the layout for the dialog
-		// Pass null as the parent view because its going in the dialog layout
-		_addEventDialogView = inflater.inflate(R.layout.add_event, null);
-		builder.setView(_addEventDialogView)
-				// Add action buttons
-				.setPositiveButton("Add", new DialogInterface.OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int id)
-					{
-						Log.d(TAG, "added");
-					}
-				})
-				.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int id)
-					{
-						Log.d(TAG, "canceled");
-					}
-				})
-				.setTitle("Add Event");
-		builder.show();
 	}
 
 	private void createNewAddressDialog()
@@ -320,7 +275,8 @@ public class MainActivity extends ActionBarActivity
 					public void onClick(DialogInterface dialog, int id)
 					{
 						EditText addressEditText = (EditText) _newAddressDialogView.findViewById(R.id.address);
-						updateSession(_session.isOffline(), addressEditText.getText().toString());
+						updateSession(addressEditText.getText().toString());
+						_isOffline = false;
 						_fetchEventsTask = new FetchEventsTask();
 						_fetchEventsTask.execute();
 						showFetchProgressDialog();
@@ -331,7 +287,7 @@ public class MainActivity extends ActionBarActivity
 				{
 					public void onClick(DialogInterface dialog, int id)
 					{
-						updateSession(true, _session.getAddress());
+						_isOffline = true;
 						Log.d(TAG, "offline");
 					}
 				})
@@ -400,8 +356,6 @@ public class MainActivity extends ActionBarActivity
 				}
 				Log.d(TAG, response);
 				in.close();
-
-//				g.close();
 			}
 			catch (IOException ioe)
 			{
@@ -418,10 +372,12 @@ public class MainActivity extends ActionBarActivity
 			{
 				createNewAddressDialog();
 			}
-			_calendarDatabaseHelper.addEvent(_event);
-			printEvents();
-			updateEvents();
+//			_calendarDatabaseHelper.addEvent(_event);
+//			printEvents();
+//			((EventView) getActiveFragment()).updateEvents();
 			_postProgressDialog.cancel();
+			_fetchEventsTask = new FetchEventsTask();
+			_fetchEventsTask.execute();
 		}
 	}
 
@@ -435,8 +391,7 @@ public class MainActivity extends ActionBarActivity
 			HttpURLConnection connection;
 			String fieldName;
 			String fullAddress;
-//			_events.clear();
-//			_calendarDatabaseHelper.deleteEvents();
+			_calendarDatabaseHelper.deleteEvents();
 			try
 			{
 				// currently using static value for start and end dates and ip
@@ -489,7 +444,6 @@ public class MainActivity extends ActionBarActivity
 								event.setEndTime(new Date(jp.getLongValue()));
 							}
 						}
-//						_events.add(event);
 						_calendarDatabaseHelper.addEvent(event);
 					}
 				}
@@ -510,42 +464,8 @@ public class MainActivity extends ActionBarActivity
 				createNewAddressDialog();
 			}
 			printEvents();
-			updateEvents();
+			((EventView) getActiveFragment()).updateEvents();
 			_fetchProgressDialog.cancel();
-		}
-	}
-
-	private class EventAdapter extends ArrayAdapter<Event>
-	{
-		private int _layout;
-
-		public EventAdapter(Context context, ArrayList<Event> events)
-		{
-			super(context, R.layout.event, events);
-			_layout = R.layout.event;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent)
-		{
-			if (convertView == null)
-			{
-				convertView = getLayoutInflater().inflate(_layout, null);
-			}
-			Event event = _dayEvents.get(position);
-			DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
-
-			TextView titleView = (TextView) convertView.findViewById(R.id.title);
-			TextView locationView = (TextView) convertView.findViewById(R.id.location);
-			TextView startTimeView = (TextView) convertView.findViewById(R.id.start_time);
-			TextView endTimeView = (TextView) convertView.findViewById(R.id.end_time);
-
-			titleView.setText(event.getTitle());
-			locationView.setText(event.getLocation());
-			startTimeView.setText(timeFormat.format(event.getStartTime()));
-			endTimeView.setText(timeFormat.format(event.getEndTime()));
-
-			return convertView;
 		}
 	}
 }

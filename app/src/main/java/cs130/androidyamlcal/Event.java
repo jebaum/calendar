@@ -13,6 +13,7 @@ public class Event
 	private String _category;
 	private Date _startTime;
 	private Date _endTime;
+	private boolean _isCached;
 
 	public String getTitle()
 	{
@@ -72,6 +73,16 @@ public class Event
 	public void setEndTime(Date endTime)
 	{
 		_endTime = endTime;
+	}
+
+	public boolean isCached()
+	{
+		return _isCached;
+	}
+
+	public void setCached(boolean isCached)
+	{
+		_isCached = isCached;
 	}
 
 //	title: "this is my title",

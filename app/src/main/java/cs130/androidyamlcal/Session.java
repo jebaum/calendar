@@ -5,18 +5,7 @@ package cs130.androidyamlcal;
  */
 public class Session
 {
-	private boolean _offline;
 	private String _address;
-
-	public boolean isOffline()
-	{
-		return _offline;
-	}
-
-	public void setOffline(boolean offline)
-	{
-		_offline = offline;
-	}
 
 	public String getAddress()
 	{
