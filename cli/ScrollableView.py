@@ -11,10 +11,14 @@ class ScrollableView(object):
   def __init__(self):
     self.pad = curses.newpad(10,10)
 
-    self.set_view_position(0,0)
-    self.set_view_size(0,0)
-    self.set_content_position(0,0)
-    self.set_content_size(100,100)
+    self.view_x = 0
+    self.view_y = 0
+    self.view_w = 0
+    self.view_h = 0
+    self.content_x = 0
+    self.content_y = 0
+    self.content_w = 100
+    self.content_h = 100
 
     self.needs_update = True
 

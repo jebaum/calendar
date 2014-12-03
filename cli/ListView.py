@@ -4,10 +4,10 @@ from event import Event
 
 class ListView(ScrollableView):
   def __init__(self):
+    super(ListView, self).__init__()
     self.event_lists = []
     for i in range(20):
       self.event_lists.append([])
-    super(ListView, self).__init__()
 
   def set_content_size(self, w, h):
     self.content_w = w
