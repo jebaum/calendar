@@ -3,6 +3,7 @@ import curses
 import traceback
 import time
 import signal
+import random
 from .cursesinterface import *
 
 global resize_flag
@@ -79,6 +80,8 @@ class NcursesDisplay:
           self.ListView.scroll_y(1)
         elif c == ord('w'):
           self.ListView.scroll_y(-1)
+        elif c == ord('r'):
+          self.ListView.update_box(5,10)
 
       self.cleanup_curses()
     except Exception as e:
