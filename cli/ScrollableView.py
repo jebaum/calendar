@@ -46,6 +46,8 @@ class ScrollableView(object):
     if self.content_x > self.content_w-self.view_w:
       self.content_x = self.content_w-self.view_w
 
+    self.needs_update = True
+
   def scroll_y(self, amount):
     self.content_y += amount
 
@@ -55,6 +57,8 @@ class ScrollableView(object):
     if self.content_y > self.content_h-self.view_h:
       self.content_y = self.content_h-self.view_h
 
+    self.needs_update = True
+
   def update(self):
     # Stub 
     for x in range(0, self.content_w-1, 10):
@@ -63,15 +67,16 @@ class ScrollableView(object):
       self.pad.addstr(y,0,str(y))
       for x in range(3, self.content_w-1):
         self.pad.addch(y,x, ord('a') + (x*x+y*y) % 26)
-    self.needs_update = False
 
   def display(self):
     if self.needs_update:
+      self.pad.erase()
       self.update()
+      self.needs_update = False
 
-    # Refresh the pad
-    # render top left corner of content into view rectangle
-    # args 1,2 are y,x for top left corner of pad
-    # args 3,4 are top left corner of terminal window rectangle to render into
-    # args 5,6 are bottom right corner of terminal window rectangle to render into
-    self.pad.refresh(self.content_y,self.content_x, self.view_y,self.view_x, self.view_y+self.view_h, self.view_x+self.view_w)
+      # Refresh the pad
+      # render top left corner of content into view rectangle
+      # args 1,2 are y,x for top left corner of pad
+      # args 3,4 are top left corner of terminal window rectangle to render into
+      # args 5,6 are bottom right corner of terminal window rectangle to render into
+      self.pad.refresh(self.content_y,self.content_x, self.view_y,self.view_x, self.view_y+self.view_h, self.view_x+self.view_w)

@@ -23,7 +23,9 @@ class NcursesDisplay:
   def setup_curses(self):
     # main window, stdscr
     self.stdscr = curses.initscr()
-    self.stdscr.nodelay(1)
+    # self.stdscr.nodelay(1)
+    curses.halfdelay(1)
+    self.stdscr.refresh()
 
     # Height, width of terminal window
     self.h, self.w = self.stdscr.getmaxyx()
@@ -63,6 +65,7 @@ class NcursesDisplay:
         self.ListView.display()
         self.SummaryView.display()
         self.CommandView.display()
+        # curses.doupdate()
         
         c = self.stdscr.getch()
 
@@ -85,6 +88,8 @@ class NcursesDisplay:
           self.ListView.scroll_y(-1)
         elif c == ord('r'):
           self.ListView.update_box(5,10)
+
+        # time.sleep(0.01)
 
       self.cleanup_curses()
     except Exception as e:

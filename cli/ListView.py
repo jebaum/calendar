@@ -51,8 +51,6 @@ class ListView(ScrollableView):
       self.pad.addch(y,i,curses.ACS_HLINE)
 
   def update(self):
-    self.pad.erase()
-
     self.draw_top_border()
 
     yoff = 1
@@ -63,5 +61,3 @@ class ListView(ScrollableView):
       yoff += self.box_heights[i]+2
 
     self.draw_bottom_border()
-
-    self.needs_update = False

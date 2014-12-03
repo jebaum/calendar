@@ -9,5 +9,3 @@ class DailyView(ScrollableView):
       self.pad.addstr(y,0,str(y))
       for x in range(3, self.content_w-1):
         self.pad.addch(y,x, ord('a') + (x*x+y*y) % 5)
-
-    self.needs_update = False
