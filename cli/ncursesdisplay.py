@@ -4,7 +4,10 @@ import traceback
 import time
 import signal
 import random
-from .cursesinterface import *
+
+from ListView import *
+from SummaryView import *
+from CommandView import *
 
 global resize_flag
 def handle_sigwinch(signum, frame):
