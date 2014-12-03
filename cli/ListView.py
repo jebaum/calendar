@@ -1,34 +1,48 @@
 import curses
 from ScrollableView import *
+from event import Event
 
 class ListView(ScrollableView):
   def __init__(self):
-    self.list_size = 20
-    self.box_heights = [1]*self.list_size
+    self.event_lists = []
+    for i in range(20):
+      self.event_lists.append([])
     super(ListView, self).__init__()
 
   def set_content_size(self, w, h):
     self.content_w = w
-    self.content_h = sum(self.box_heights) + 1 + self.list_size*1
+    self.content_h = 1 + len(self.event_lists) + sum([self.height_for_event_list(x) for x in self.event_lists])
+
     self.pad.resize(self.content_h,self.content_w+1)
     self.needs_update = True
 
   def update_size(self):
-    # Leverages content_sizes resizing based on list_size and box_heights
     self.set_content_size(self.content_w,self.content_h)
 
-  def update_box(self, index, value):
-    self.box_heights[index] = value
+  def add_event(self, i, e):
+    self.event_lists[i].append(e)
     self.update_size()
 
-  def draw_box(self, y, h, index):
-    self.pad.addstr(y,1,str(index))
+  def height_for_event_list(self, el):
+    return max(1,2 * len(el))
+
+  def draw_box(self, y, events):
+    h = self.height_for_event_list(events)
+
     # Right vertical line
     for i in range(h):
       self.pad.addch(y+i,0,curses.ACS_VLINE)
     # Left vertical line
     for i in range(h):
       self.pad.addch(y+i, self.content_w-1,curses.ACS_VLINE)
+
+    # Draw events
+    for i in range(len(events)):
+      e = events[i]
+      # Start time 
+      self.pad.addstr(y+i*2,1, str(e.hour).rjust(2,'0') + ":" + str(e.minute).rjust(2,'0'))
+      self.pad.addstr(y+i*2,7,str(e.title))
+      self.pad.addstr(y+1+i*2,7,str(e.description))
 
   def draw_separator(self,y):
     self.pad.addch(y,0,curses.ACS_LTEE)
@@ -54,10 +68,11 @@ class ListView(ScrollableView):
     self.draw_top_border()
 
     yoff = 1
-    for i in range(self.list_size):
-      self.draw_box(yoff,self.box_heights[i],i)
-      if i != self.list_size-1:
-        self.draw_separator(yoff+self.box_heights[i])
-      yoff += self.box_heights[i]+1
+    l = len(self.event_lists)
+    for i in range(l):
+      self.draw_box(yoff, self.event_lists[i])
+      if i != l-1:
+        self.draw_separator(yoff+self.height_for_event_list(self.event_lists[i]))
+      yoff += self.height_for_event_list(self.event_lists[i])+1
 
     self.draw_bottom_border()

@@ -9,6 +9,9 @@ class Event(object):
         self.category = None
         self.description = None
         self.json_keys = ["title", "startTime", "endTime", "location", "category", "description"]
+        
+        self.startDate = datetime.datetime.fromtimestamp(self.startTime/1000)
+        self.endDate = datetime.datetime.fromtimestamp(self.endTime/1000)
 
     def __repr__(self):
         return self.__str__()

@@ -8,6 +8,7 @@ import random
 from ListView import *
 from SummaryView import *
 from CommandView import *
+from event import *
 
 global resize_flag
 def handle_sigwinch(signum, frame):
@@ -87,7 +88,7 @@ class NcursesDisplay:
         elif c == ord('w'):
           self.ListView.scroll_y(-1)
         elif c == ord('r'):
-          self.ListView.update_box(5,10)
+          self.ListView.add_event(random.randint(0,19), Event())
 
         # time.sleep(0.01)
 
