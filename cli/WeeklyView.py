@@ -14,13 +14,14 @@ class WeeklyView(TimeView,ListView):
 
     self.EventStore = EventStore
 
-    self.box_header_width = 5
+    self.box_header_width = 11
 
     self.get_period_func = self.get_week_period
     self.offset_period_func = self.apply_week_offset
 
-  def draw_box_header(self,y):
-    self.pad.addstr(y,1,str(y).rjust(self.box_header_width))
+  def draw_box_header(self,y,index):
+    headers = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    self.pad.addstr(y,2,headers[index].ljust(self.box_header_width))
 
   def update(self):
     self.clear_events()

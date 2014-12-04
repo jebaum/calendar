@@ -41,7 +41,7 @@ class ListView(ScrollableView):
     yoff = 1
     l = len(self.event_lists)
     for i in range(l):
-      self.draw_box(yoff, self.event_lists[i])
+      self.draw_box(yoff, self.event_lists[i],i)
       if i != l-1:
         self.draw_separator(yoff+self.height_for_event_list(self.event_lists[i]))
       yoff += self.height_for_event_list(self.event_lists[i])+1
@@ -51,7 +51,7 @@ class ListView(ScrollableView):
   # 
   # DRAWING FUNCTIONS
   #
-  def draw_box(self, y, events):
+  def draw_box(self, y, events, index):
     h = self.height_for_event_list(events)
     xoff = self.box_header_width + 1
     
@@ -59,13 +59,13 @@ class ListView(ScrollableView):
     self.draw_item_border(y,h)
 
     # Draw header
-    self.draw_box_header(y)
+    self.draw_box_header(y,index)
 
     # Draw events
     for i in range(len(events)):
       self.draw_event(y+i*2,xoff,events[i])
 
-  def draw_box_header(self,y):
+  def draw_box_header(self,y,index):
     pass
 
   def draw_event(self,y,x,e):

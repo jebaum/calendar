@@ -82,18 +82,24 @@ class NcursesDisplay:
           # Exit
           break
         # WASD Scrolling
-        elif c == ord('a'):
+        elif c == ord('h'):
           # self.ListView.scroll_x(-1)
           self.ListView.change_time_period(-1)
-        elif c == ord('d'):
+        elif c == ord('l'):
           # self.ListView.scroll_x(1)
           self.ListView.change_time_period(1)
-        elif c == ord('s'):
+        elif c == ord('j'):
           self.ListView.scroll_y(1)
-        elif c == ord('w'):
+        elif c == ord('k'):
           self.ListView.scroll_y(-1)
         elif c == ord('r'):
           self.ListView.add_event(random.randint(0,19), Event())
+        elif c == ord('d'):
+          self.ListView = self.DailyView
+          self.resize_views()
+        elif c == ord('w'):
+          self.ListView = self.WeeklyView
+          self.resize_views()
 
         # time.sleep(0.01)
 

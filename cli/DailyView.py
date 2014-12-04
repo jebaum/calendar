@@ -14,15 +14,15 @@ class DailyView(TimeView,ListView):
 
     self.EventStore = EventStore
 
-    self.box_header_width = 5
+    self.box_header_width = 6 
     # self.view_header = "Today"
     self.view_header = self.get_view_header()
 
     self.get_period_func = self.get_day_period
     self.offset_period_func = self.apply_day_offset
 
-  def draw_box_header(self,y):
-    self.pad.addstr(y,1,str(y).rjust(self.box_header_width))
+  def draw_box_header(self,y,index):
+    self.pad.addstr(y,2,"%s:00" % (str(index).rjust(2,'0')))
 
   def update(self):
     self.clear_events()
