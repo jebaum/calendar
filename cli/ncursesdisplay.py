@@ -61,7 +61,7 @@ class NcursesDisplay:
       self.MonthlyView = MonthlyView(es)
 
       self.ListView = self.DailyView
-      self.CommandView = CommandView(self.stdscr)
+      self.CommandView = CommandView(self.stdscr, es)
       self.resize_views()
 
       global resize_flag

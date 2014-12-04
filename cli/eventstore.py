@@ -59,12 +59,20 @@ class EventStore():
     return events
 
   def add_filter(self, key, filter_info):
-    if filter_info == None:
+    if key in self.filters.keys() and (filter_info == None or 'None' in filter_info):
       self.filters[key] = None
+      return 'Success! Clear filter (%s)' % (key)
 
     if key == 'date':
       date_filter = lambda e: True if e.startDate > filter_info[0] and e.startDate < filter_info[1] else False
       self.filters[key] = date_filter
+      return True
+    elif key in self.filters.keys():
+      search_filter = lambda e: filter_info in getattr(e, key, None)
+      self.filters[key] = search_filter
+      return 'Success! Filter (%s) in (%s)' % (filter_info, key)
+
+    return False
 
   def get_events_from_json_file(self, filename):
     """
