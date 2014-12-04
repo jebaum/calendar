@@ -1,5 +1,6 @@
 import curses
 from curses.textpad import Textbox, rectangle
+import re
 
 class CommandView(object):
   def __init__(self, stdscr):
@@ -36,6 +37,14 @@ class CommandView(object):
     self.stdscr.addstr(self.y,self.x,self.cmd)
     self.stdscr.refresh()
 
+  def apply_command(self):
+    if 'filter' in self.cmd:
+      match = re.match(r'filter (.*)=(.*)', self.cmd, re.DOTALL)
+      if match == None:
+        self.cmd = 'Filter not recognized, must be format key=xxx'
+        return
+      self.cmd = "1:%s, 2:%s" % (match.group(1), match.group(2))
+
   def draw_help(self):
     rectangle(self.stdscr,self.y-4,self.x,self.y-1, self.w)
     self.stdscr.addstr(self.y-3,self.x+2,'Ctrl-H Delete')
@@ -55,3 +64,4 @@ class CommandView(object):
     # Edit and save command
     self.textbox.edit()
     self.cmd = self.textbox.gather()
+    self.apply_command()
