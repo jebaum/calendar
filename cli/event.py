@@ -65,8 +65,8 @@ class Event(object):
     def date_from_time_seconds(self):
       # Create datetime objects from seconds from epoch
       # Must convert miliseconds since epoch (standard of api) to seconds first
-      self.startDate = datetime.datetime.fromtimestamp(self.startTime/1000)
-      self.endDate = datetime.datetime.fromtimestamp(self.endTime/1000)
+      self.startDate = datetime.datetime.utcfromtimestamp(self.startTime)
+      self.endDate = datetime.datetime.utcfromtimestamp(self.endTime)
 
 
     def load_from_json(self, json_dict):
