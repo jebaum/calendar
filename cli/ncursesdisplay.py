@@ -117,6 +117,10 @@ class NcursesDisplay:
           self.resize_views()
         elif c == ord(':'):
           self.CommandView.edit()
+          self.stdscr.erase()
+          self.stdscr.refresh()
+          self.resize_views()
+          self.CommandView.display_response()
 
         # time.sleep(0.01)
 

@@ -15,10 +15,21 @@ class CommandView(object):
     nw.attron(0)
     return nw,textbox
 
+  def display_response(self):
+    self.stdscr.addstr(self.maxh-1,0,self.cmd)
+    self.stdscr.refresh()
+
   def edit(self):
+    rectangle(self.stdscr,self.maxh-5,0,self.maxh-2, self.maxw-1)
+    self.stdscr.addstr(self.maxh-4,2,'Ctrl-H Delete')
+    self.stdscr.addstr(self.maxh-3,2,'Ctrl-G Enter Command')
     self.stdscr.addstr(self.maxh-1,0,': ')
     self.stdscr.refresh()
 
+    # Clear from last command
+    self.textwin.erase()
+    self.textwin.refresh()
+
     self.textbox.edit()
-    cmd = self.textbox.gather()
-    raise Exception(cmd)
+    self.cmd = self.textbox.gather()
+    self.textwin.clrtoeol()
