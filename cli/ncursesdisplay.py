@@ -8,6 +8,7 @@ import random
 from ListView import *
 from DailyView import *
 from WeeklyView import *
+from MonthlyView import *
 from SummaryView import *
 from CommandView import *
 from event import *
@@ -57,8 +58,9 @@ class NcursesDisplay:
       es = EventStore()
       self.DailyView = DailyView(es)
       self.WeeklyView = WeeklyView(es)
+      self.MonthlyView = MonthlyView(es)
 
-      self.ListView = self.WeeklyView
+      self.ListView = self.DailyView
       self.CommandView = CommandView()
       self.resize_views()
 
@@ -101,6 +103,11 @@ class NcursesDisplay:
           self.stdscr.erase()
           self.stdscr.refresh()
           self.ListView = self.WeeklyView
+          self.resize_views()
+        elif c == ord('m'):
+          self.stdscr.erase()
+          self.stdscr.refresh()
+          self.ListView = self.MonthlyView
           self.resize_views()
 
         # time.sleep(0.01)
