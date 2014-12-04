@@ -10,8 +10,7 @@ class Event(object):
         self.description = None
         self.json_keys = ["title", "startTime", "endTime", "location", "category", "description"]
         
-        self.startDate = datetime.datetime.fromtimestamp(self.startTime/1000)
-        self.endDate = datetime.datetime.fromtimestamp(self.endTime/1000)
+        self.date_from_time_seconds()
 
     def __repr__(self):
         return self.__str__()
@@ -63,11 +62,15 @@ class Event(object):
     def endYear(self):
         return self.endDate.year
 
+    def date_from_time_seconds(self):
+      # Create datetime objects from seconds from epoch
+      # Must convert miliseconds since epoch (standard of api) to seconds first
+      self.startDate = datetime.datetime.fromtimestamp(self.startTime/1000)
+      self.endDate = datetime.datetime.fromtimestamp(self.endTime/1000)
+
+
     def load_from_json(self, json_dict):
         for k,v in json_dict.items():
             setattr(self, k, v)
 
-        # Create datetime objects from seconds from epoch
-        # Must convert miliseconds since epoch (standard of api) to seconds first
-        self.startDate = datetime.datetime.fromtimestamp(self.startTime/1000)
-        self.endDate = datetime.datetime.fromtimestamp(self.endTime/1000)
+        self.date_from_time_seconds()

@@ -22,5 +22,15 @@ class DailyView(TimeView,ListView):
     self.pad.addstr(y,1,str(y).rjust(self.box_header_width))
 
   def update(self):
+    self.clear_events()
+    self.add_events(self.EventStore.get_events())
     self.view_header = self.get_view_header()
     super(DailyView, self).update()
+
+  def clear_events(self):
+    for i in range(len(self.event_lists)):
+      self.event_lists[i] = []
+
+  def add_events(self,events):
+    for e in events:
+      self.add_event(e.startHour, e)
