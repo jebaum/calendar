@@ -50,6 +50,13 @@ class CommandView(object):
     self.stdscr.addstr(self.y-3,self.x+2,'Ctrl-H Delete')
     self.stdscr.addstr(self.y-2,self.x+2,'Ctrl-G Enter Command')
 
+  def validate(self, ch):
+    if ch == ord(curses.erasechar()):
+      (y,x) = self.textwin.getyx()
+      self.textwin.move(y,x-1)
+      self.textwin.delch()
+    return ch
+
   def edit(self):
     self.update_textbox()
 
@@ -57,11 +64,11 @@ class CommandView(object):
     self.textwin.erase()
     self.textwin.refresh()
 
-    self.draw_help()
+    # self.draw_help()
     self.stdscr.addstr(self.y,self.x,': ')
     self.stdscr.refresh()
 
     # Edit and save command
-    self.textbox.edit()
+    self.textbox.edit(self.validate)
     self.cmd = self.textbox.gather()
     self.apply_command()
