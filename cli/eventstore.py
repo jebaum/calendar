@@ -8,13 +8,19 @@ class EventStore():
     # cache: tuple (events:list, last_update:datetime)
     self.cache = ([], None)
 
+    self.filters = {'date': None,
+                    'title': None,
+                    'description': None,
+                    'category': None,
+                    'location': None}
+
   # 
   # EXTERNAL
   # 
-  def get_events(self, event_filter=None):
+  def get_events(self):
     """
     Return events, fetching from server as needed
-    If filter is specified as tuple (start_datetime, end_datetime), filter to that period
+    Applies any active filters
     """
     if self.cache[1] is None:
       events = []
@@ -31,7 +37,7 @@ class EventStore():
       self.cache = (events, 1)
       # self.cache = (self.get_events_from_json_file("json.txt"), None)
 
-    return self.filter_events(self.cache[0], event_filter)
+    return self.filter_events(self.cache[0])
 
   def update_event(self, e):
     """
@@ -42,20 +48,23 @@ class EventStore():
   # 
   # INTERNAL
   # 
-  def filter_events(self, events, event_filter):
+  def filter_events(self, events):
     """
-    Given a list of events, only return those in period defined by filter tuple
-    filter tuple of form (start_datetime, end_datetime)
+    Given a list of events, iterates over self.filter functions and applies them
     """
-    if event_filter is None:
-      return events
+    for k,f in self.filters.items():
+      if f == None:
+        continue
+      events = filter(f, events)
+    return events
 
-    filtered = []
-    for e in events:
-      if e.startDate > event_filter[0] and e.startDate < event_filter[1]:
-        filtered.append(e)
+  def add_filter(self, key, filter_info):
+    if filter_info == None:
+      self.filters[key] = None
 
-    return filtered
+    if key == 'date':
+      date_filter = lambda e: True if e.startDate > filter_info[0] and e.startDate < filter_info[1] else False
+      self.filters[key] = date_filter
 
   def get_events_from_json_file(self, filename):
     """

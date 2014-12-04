@@ -25,8 +25,8 @@ class WeeklyView(TimeView,ListView):
 
   def update(self):
     self.clear_events()
-    self.add_events(self.EventStore.get_events(self.period))
-    self.view_header = self.get_view_header()
+    self.EventStore.add_filter('date', self.period)
+    self.add_events(self.EventStore.get_events())
     super(WeeklyView, self).update()
 
   def clear_events(self):

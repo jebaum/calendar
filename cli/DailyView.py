@@ -26,7 +26,8 @@ class DailyView(TimeView,ListView):
 
   def update(self):
     self.clear_events()
-    self.add_events(self.EventStore.get_events(self.period))
+    self.EventStore.add_filter('date', self.period)
+    self.add_events(self.EventStore.get_events())
     self.view_header = self.get_view_header()
     super(DailyView, self).update()
 
