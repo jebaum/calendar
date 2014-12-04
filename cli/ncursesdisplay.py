@@ -84,9 +84,15 @@ class NcursesDisplay:
         # WASD Scrolling
         elif c == ord('h'):
           # self.ListView.scroll_x(-1)
+          self.stdscr.erase()
+          self.stdscr.refresh()
+          self.resize_views()
           self.ListView.change_time_period(-1)
         elif c == ord('l'):
           # self.ListView.scroll_x(1)
+          self.stdscr.erase()
+          self.stdscr.refresh()
+          self.resize_views()
           self.ListView.change_time_period(1)
         elif c == ord('j'):
           self.ListView.scroll_y(1)
