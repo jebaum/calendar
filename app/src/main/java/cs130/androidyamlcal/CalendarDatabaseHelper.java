@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -79,35 +80,10 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		cv.put(EVENT_LOCATION, event.getLocation());
 		cv.put(EVENT_DESCRIPTION, event.getDescription());
 		cv.put(EVENT_CATEGORY, event.getCategory());
-		cv.put(EVENT_START_TIME, event.getStartTime().getTime());
-		cv.put(EVENT_END_TIME, event.getEndTime().getTime());
+		cv.put(EVENT_START_TIME, event.getStartTime().getTimeInMillis());
+		cv.put(EVENT_END_TIME, event.getEndTime().getTimeInMillis());
 		cv.put(EVENT_IS_CACHED, event.isCached());
 		db.insert(EVENT, null, cv);
-	}
-
-	public ArrayList<Event> getEvents(Date date)
-	{
-		ArrayList<Event> events = new ArrayList<Event>();
-		Date today = new Date(date.getYear(), date.getMonth(), date.getDate(), 0, 0, 0);
-		Date tomorrow = new Date(date.getYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0);
-		SQLiteDatabase db = getReadableDatabase();
-		Cursor cursor = db.query(EVENT, null,
-			EVENT_START_TIME + " >= " + today.getTime() + " AND " + EVENT_START_TIME + " < " + tomorrow.getTime(),
-			null, null, null, null);
-
-		while (cursor.moveToNext())
-		{
-			Event event = new Event();
-			event.setTitle(cursor.getString(cursor.getColumnIndex(EVENT_TITLE)));
-			event.setLocation(cursor.getString(cursor.getColumnIndex(EVENT_LOCATION)));
-			event.setDescription(cursor.getString(cursor.getColumnIndex(EVENT_DESCRIPTION)));
-			event.setCategory(cursor.getString(cursor.getColumnIndex(EVENT_CATEGORY)));
-			event.setStartTime(new Date(cursor.getInt(cursor.getColumnIndex(EVENT_START_TIME))));
-			event.setEndTime(new Date(cursor.getInt(cursor.getColumnIndex(EVENT_END_TIME))));
-			event.setCached(cursor.getShort(cursor.getColumnIndex(EVENT_IS_CACHED)) == 1);
-			events.add(event);
-		}
-		return events;
 	}
 
 	public ArrayList<Event> getEvents()
@@ -122,10 +98,15 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 			event.setLocation(cursor.getString(cursor.getColumnIndex(EVENT_LOCATION)));
 			event.setDescription(cursor.getString(cursor.getColumnIndex(EVENT_DESCRIPTION)));
 			event.setCategory(cursor.getString(cursor.getColumnIndex(EVENT_CATEGORY)));
-			Log.d(TAG, "db start_time:" + String.valueOf(cursor.getLong(cursor.getColumnIndex
-					(EVENT_START_TIME))));
-			event.setStartTime(new Date(cursor.getLong(cursor.getColumnIndex(EVENT_START_TIME))));
-			event.setEndTime(new Date(cursor.getLong(cursor.getColumnIndex(EVENT_END_TIME))));
+
+			Calendar startTime = Calendar.getInstance();
+			startTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(EVENT_START_TIME)));
+			event.setStartTime(startTime);
+
+			Calendar endTime = Calendar.getInstance();
+			endTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(EVENT_END_TIME)));
+			event.setEndTime(endTime);
+
 			event.setCached(cursor.getShort(cursor.getColumnIndex(EVENT_IS_CACHED)) == 1);
 			events.add(event);
 		}

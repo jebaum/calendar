@@ -22,5 +22,6 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.github.alamkanak:android-week-view:1.1.7'
     compile files('src/main/java/libs/jackson-core-2.4.2.jar')
 }

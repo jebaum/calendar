@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -54,6 +56,9 @@ public class MainActivity extends ActionBarActivity
 
 		_isOffline = false;
 		setContentView(R.layout.activity_fragment);
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+
 		_fragmentManager = getSupportFragmentManager();
 		Fragment fragment = getActiveFragment();
 
@@ -61,7 +66,7 @@ public class MainActivity extends ActionBarActivity
 		{
 			fragment = new MonthViewFragment();
 			_fragmentManager.beginTransaction()
-					.add(android.R.id.content, fragment)
+					.add(R.id.fragment_container, fragment)
 					.commit();
 		}
 
@@ -108,6 +113,7 @@ public class MainActivity extends ActionBarActivity
 	{
 		boolean ret = super.onCreateOptionsMenu(menu);
 		getMenuInflater().inflate(R.menu.main, menu);
+		menu.getItem(R.id.month_view);
 		return ret;
 	}
 
@@ -127,6 +133,16 @@ public class MainActivity extends ActionBarActivity
 				_isOffline = !_isOffline;
 				item.setChecked(_isOffline);
 				return true;
+			case R.id.week_view:
+				Log.d(TAG, "week view");
+				item.setChecked(true);
+				swapFragment(new WeekViewFragment());
+				return true;
+			case R.id.month_view:
+				Log.d(TAG, "month view");
+				item.setChecked(true);
+				swapFragment(new MonthViewFragment());
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -140,18 +156,25 @@ public class MainActivity extends ActionBarActivity
 			if(resultCode == RESULT_OK)
 			{
 				Event event = new Event();
+
 				event.setTitle(data.getStringExtra(CalendarDatabaseHelper.EVENT_TITLE));
 				event.setLocation(data.getStringExtra(CalendarDatabaseHelper.EVENT_LOCATION));
 				event.setDescription(data.getStringExtra(CalendarDatabaseHelper.EVENT_DESCRIPTION));
 				event.setCategory(data.getStringExtra(CalendarDatabaseHelper.EVENT_CATEGORY));
-				event.setStartTime(new Date(data.getLongExtra(CalendarDatabaseHelper
-						.EVENT_START_TIME, 0)));
-				event.setEndTime(new Date(data.getLongExtra(CalendarDatabaseHelper.EVENT_END_TIME,
-						0)));
+
+				Calendar startTime = Calendar.getInstance();
+				startTime.setTimeInMillis(data.getLongExtra(CalendarDatabaseHelper.EVENT_START_TIME, 0));
+				event.setStartTime(startTime);
+
+				Calendar endTime = Calendar.getInstance();
+				endTime.setTimeInMillis(data.getLongExtra(CalendarDatabaseHelper.EVENT_END_TIME, 0));
+				event.setEndTime(endTime);
+
 				event.setCached(_isOffline);
 
 				DateFormat df = DateFormat.getDateTimeInstance();
-				Log.d(TAG, "new event start time: " + df.format(event.getStartTime()));
+				Log.d(TAG, "new event start time: " + df.format(event.getStartTime().getTime()));
+				Log.d(TAG, "new event end time: " + df.format(event.getEndTime().getTime()));
 
 				if (!_isOffline)
 				{
@@ -173,9 +196,16 @@ public class MainActivity extends ActionBarActivity
 		}
 	}
 
+	private void swapFragment(Fragment fragment)
+	{
+		_fragmentManager.beginTransaction()
+				.replace(R.id.fragment_container, fragment)
+				.commit();
+	}
+
 	private Fragment getActiveFragment()
 	{
-		return _fragmentManager.findFragmentById(android.R.id.content);
+		return _fragmentManager.findFragmentById(R.id.fragment_container);
 	}
 
 	private void showPostProgressDialog()
@@ -252,8 +282,8 @@ public class MainActivity extends ActionBarActivity
 					+ ", location: " + event.getLocation()
 					+ ", description: " + event.getDescription()
 					+ ", category: " + event.getCategory()
-					+ ", startTime: " + df.format(event.getStartTime())
-					+ ", endTime: " + df.format(event.getEndTime())
+					+ ", startTime: " + df.format(event.getStartTime().getTime())
+					+ ", endTime: " + df.format(event.getEndTime().getTime())
 					+ ", isCached: " + event.isCached());
 		}
 	}
@@ -339,8 +369,9 @@ public class MainActivity extends ActionBarActivity
 						_event.getDescription());
 				g.writeStringField(CalendarDatabaseHelper.EVENT_CATEGORY, _event.getCategory());
 				g.writeNumberField(CalendarDatabaseHelper.EVENT_START_TIME,
-						_event.getStartTime().getTime());
-				g.writeNumberField(CalendarDatabaseHelper.EVENT_END_TIME, _event.getEndTime().getTime());
+						_event.getStartTime().getTimeInMillis());
+				g.writeNumberField(CalendarDatabaseHelper.EVENT_END_TIME,
+						_event.getEndTime().getTimeInMillis());
 				g.writeEndObject();
 				g.writeEndArray();
 				g.close();
@@ -391,6 +422,7 @@ public class MainActivity extends ActionBarActivity
 			HttpURLConnection connection;
 			String fieldName;
 			String fullAddress;
+
 			_calendarDatabaseHelper.deleteEvents();
 			try
 			{
@@ -418,7 +450,7 @@ public class MainActivity extends ActionBarActivity
 						while (jp.nextToken() != JsonToken.END_OBJECT)
 						{
 							fieldName = jp.getCurrentName();
-							Log.d(TAG, jp.nextToken().toString());
+							jp.nextToken();
 							if (fieldName.equals("title"))
 							{
 								event.setTitle(jp.getText());
@@ -437,13 +469,21 @@ public class MainActivity extends ActionBarActivity
 							}
 							else if (fieldName.equals("startTime"))
 							{
-								event.setStartTime(new Date(jp.getLongValue()));
+								Calendar startTime = Calendar.getInstance();
+								startTime.setTimeInMillis(jp.getLongValue());
+								event.setStartTime(startTime);
 							}
 							else if (fieldName.equals("endTime"))
 							{
-								event.setEndTime(new Date(jp.getLongValue()));
+								Calendar endTime = Calendar.getInstance();
+								endTime.setTimeInMillis(jp.getLongValue());
+								event.setEndTime(endTime);
 							}
 						}
+						Log.d(TAG, "title: " + event.getTitle() +
+										", start_date: " + event.getStartTime().toString() +
+										", end_date: " + event.getEndTime().toString()
+						);
 						_calendarDatabaseHelper.addEvent(event);
 					}
 				}

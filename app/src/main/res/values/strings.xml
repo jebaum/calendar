@@ -19,5 +19,7 @@
     <string name="end_time">End Time</string>
     <string name="add">Add</string>
     <string name="offline">Offline</string>
+    <string name="week_view">Week View</string>
+    <string name="month_view">Month View</string>
 
 </resources>

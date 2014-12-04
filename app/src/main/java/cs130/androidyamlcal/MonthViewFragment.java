@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -40,8 +41,6 @@ public class MonthViewFragment extends Fragment implements EventView
 	                         Bundle savedInstanceState)
 	{
 		View v = inflater.inflate(R.layout.activity_main, container, false);
-		Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar);
-		((MainActivity) getActivity()).setSupportActionBar(toolbar);
 
 		ListView eventsList = (ListView) v.findViewById(R.id.events_list);
 		_eventAdapter = new EventAdapter(getActivity(), _dayEvents);
@@ -66,13 +65,13 @@ public class MonthViewFragment extends Fragment implements EventView
 		_dayEvents.clear();
 		for (Event event : _calendarDatabaseHelper.getEvents())
 		{
-			Date startTime = event.getStartTime();
-			Log.d(TAG, "year: " + startTime.getYear()
-					+ ", month: " + startTime.getMonth()
-					+ ", dayOfMonth: " + startTime.getDate());
-			if (startTime.getDate() == dayOfMonth &&
-					startTime.getMonth() == month &&
-					startTime.getYear() + 1900 == year)
+			Calendar startTime = event.getStartTime();
+			Log.d(TAG, "year: " + startTime.get(Calendar.YEAR)
+					+ ", month: " + startTime.get(Calendar.MONTH)
+					+ ", dayOfMonth: " + startTime.get(Calendar.DAY_OF_MONTH));
+			if (startTime.get(Calendar.DAY_OF_MONTH) == dayOfMonth &&
+					startTime.get(Calendar.MONTH) == month &&
+					startTime.get(Calendar.YEAR) == year)
 			{
 				_dayEvents.add(event);
 			}
@@ -114,8 +113,8 @@ public class MonthViewFragment extends Fragment implements EventView
 
 			titleView.setText(event.getTitle());
 			locationView.setText(event.getLocation());
-			startTimeView.setText(timeFormat.format(event.getStartTime()));
-			endTimeView.setText(timeFormat.format(event.getEndTime()));
+			startTimeView.setText(timeFormat.format(event.getStartTime().getTime()));
+			endTimeView.setText(timeFormat.format(event.getEndTime().getTime()));
 
 			return convertView;
 		}

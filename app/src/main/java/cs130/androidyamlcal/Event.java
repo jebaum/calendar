@@ -1,5 +1,6 @@
 package cs130.androidyamlcal;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -11,8 +12,8 @@ public class Event
 	private String _location;
 	private String _description;
 	private String _category;
-	private Date _startTime;
-	private Date _endTime;
+	private Calendar _startTime;
+	private Calendar _endTime;
 	private boolean _isCached;
 
 	public String getTitle()
@@ -55,22 +56,22 @@ public class Event
 		_category = category;
 	}
 
-	public Date getStartTime()
+	public Calendar getStartTime()
 	{
 		return _startTime;
 	}
 
-	public void setStartTime(Date startTime)
+	public void setStartTime(Calendar startTime)
 	{
 		_startTime = startTime;
 	}
 
-	public Date getEndTime()
+	public Calendar getEndTime()
 	{
 		return _endTime;
 	}
 
-	public void setEndTime(Date endTime)
+	public void setEndTime(Calendar endTime)
 	{
 		_endTime = endTime;
 	}
