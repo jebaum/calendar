@@ -7,9 +7,9 @@ class CommandView(object):
     self.maxw = maxw
     self.maxh = maxh
 
-    self.textwin, self.textbox = self.maketextbox(1,self.maxw-1,self.maxh-1,2)
+    self.textwin, self.textbox = self.make_textbox(1,self.maxw-1,self.maxh-1,2)
 
-  def maketextbox(self, h,w,y,x):
+  def make_textbox(self, h,w,y,x):
     nw = curses.newwin(h,w,y,x)
     textbox = curses.textpad.Textbox(nw)
     nw.attron(0)
@@ -30,6 +30,6 @@ class CommandView(object):
     self.textwin.erase()
     self.textwin.refresh()
 
+    # Edit and save command
     self.textbox.edit()
     self.cmd = self.textbox.gather()
-    self.textwin.clrtoeol()

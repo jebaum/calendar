@@ -72,6 +72,10 @@ class ScrollableView(object):
       for x in range(3, self.content_w-1):
         self.pad.addch(y,x, ord('a') + (x*x+y*y) % 26)
 
+  def refresh(self):
+    # Mark for update
+    self.needs_update = True
+
   def display(self):
     if self.needs_update:
       self.pad.erase()

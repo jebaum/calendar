@@ -81,45 +81,34 @@ class NcursesDisplay:
         if c == ord('q'):
           # Exit
           break
-        # WASD Scrolling
+        # HJKL Scrolling
         elif c == ord('h'):
-          # self.ListView.scroll_x(-1)
-          self.stdscr.erase()
-          self.stdscr.refresh()
-          self.resize_views()
           self.ListView.change_time_period(-1)
+          self.refresh_views()
         elif c == ord('l'):
-          # self.ListView.scroll_x(1)
-          self.stdscr.erase()
-          self.stdscr.refresh()
-          self.resize_views()
           self.ListView.change_time_period(1)
+          self.refresh_views()
         elif c == ord('j'):
           self.ListView.scroll_y(1)
         elif c == ord('k'):
           self.ListView.scroll_y(-1)
-        elif c == ord('r'):
-          self.ListView.add_event(random.randint(0,19), Event())
+        
+        # Switch views with D/W/M
         elif c == ord('d'):
-          self.stdscr.erase()
-          self.stdscr.refresh()
           self.ListView = self.DailyView
-          self.resize_views()
+          self.refresh_views()
         elif c == ord('w'):
-          self.stdscr.erase()
-          self.stdscr.refresh()
           self.ListView = self.WeeklyView
-          self.resize_views()
+          self.refresh_views()
         elif c == ord('m'):
-          self.stdscr.erase()
-          self.stdscr.refresh()
           self.ListView = self.MonthlyView
-          self.resize_views()
+          self.refresh_views()
+
+        # Enter command
         elif c == ord(':'):
           self.CommandView.edit()
-          self.stdscr.erase()
-          self.stdscr.refresh()
-          self.resize_views()
+          # Refresh to clear help box, apply any commands
+          self.refresh_views()
           self.CommandView.display_response()
 
         # time.sleep(0.01)
@@ -132,11 +121,22 @@ class NcursesDisplay:
       traceback.print_exc()
       sys.exit(1)
 
-  def resize_views(self):
-      self.ListView.set_view_position(0,0)
-      self.ListView.set_view_size(self.w-1,self.h-2)
-      self.ListView.set_content_size(self.w,self.h)
+  def refresh_views(self):
+    self.stdscr.erase()
+    self.stdscr.refresh()
+    self.DailyView.refresh()
+    self.WeeklyView.refresh()
+    self.MonthlyView.refresh()
 
-      # self.CommandView.set_view_position(0,self.h-1)
-      # self.CommandView.set_view_size(self.w-1,1)
-      # self.CommandView.set_content_size(self.w,1)
+  def resize_views(self):
+      self.DailyView.set_view_position(0,0)
+      self.DailyView.set_view_size(self.w-1,self.h-2)
+      self.DailyView.set_content_size(self.w,self.h)
+      
+      self.WeeklyView.set_view_position(0,0)
+      self.WeeklyView.set_view_size(self.w-1,self.h-2)
+      self.WeeklyView.set_content_size(self.w,self.h)
+
+      self.MonthlyView.set_view_position(0,0)
+      self.MonthlyView.set_view_size(self.w-1,self.h-2)
+      self.MonthlyView.set_content_size(self.w,self.h)
