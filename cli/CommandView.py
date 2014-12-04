@@ -24,7 +24,7 @@ class CommandView(object):
     self.update_textbox()
 
   def update_textbox(self):
-    self.textwin, self.textbox = self.make_textbox(self.x,self.y,self.w,self.h)
+    self.textwin, self.textbox = self.make_textbox(self.x+2,self.y,self.w,self.h)
 
   def make_textbox(self,x,y,w,h):
     nw = curses.newwin(h,w,y,x)
@@ -36,18 +36,21 @@ class CommandView(object):
     self.stdscr.addstr(self.y,self.x,self.cmd)
     self.stdscr.refresh()
 
+  def draw_help(self):
+    rectangle(self.stdscr,self.y-4,self.x,self.y-1, self.w)
+    self.stdscr.addstr(self.y-3,self.x+2,'Ctrl-H Delete')
+    self.stdscr.addstr(self.y-2,self.x+2,'Ctrl-G Enter Command')
+
   def edit(self):
     self.update_textbox()
-
-    # rectangle(self.stdscr,self.maxh-5,0,self.maxh-2, self.maxw-1)
-    # self.stdscr.addstr(self.maxh-4,2,'Ctrl-H Delete')
-    # self.stdscr.addstr(self.maxh-3,2,'Ctrl-G Enter Command')
-    # self.stdscr.addstr(self.maxh-1,0,': ')
-    # self.stdscr.refresh()
 
     # Clear from last command
     self.textwin.erase()
     self.textwin.refresh()
+
+    self.draw_help()
+    self.stdscr.addstr(self.y,self.x,': ')
+    self.stdscr.refresh()
 
     # Edit and save command
     self.textbox.edit()
