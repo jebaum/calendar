@@ -59,7 +59,6 @@ class NcursesDisplay:
       self.WeeklyView = WeeklyView(es)
 
       self.ListView = self.WeeklyView
-      self.SummaryView = SummaryView()
       self.CommandView = CommandView()
       self.resize_views()
 
@@ -67,7 +66,6 @@ class NcursesDisplay:
 
       while True:
         self.ListView.display()
-        self.SummaryView.display()
         self.CommandView.display()
         # curses.doupdate()
         
@@ -95,9 +93,13 @@ class NcursesDisplay:
         elif c == ord('r'):
           self.ListView.add_event(random.randint(0,19), Event())
         elif c == ord('d'):
+          self.stdscr.erase()
+          self.stdscr.refresh()
           self.ListView = self.DailyView
           self.resize_views()
         elif c == ord('w'):
+          self.stdscr.erase()
+          self.stdscr.refresh()
           self.ListView = self.WeeklyView
           self.resize_views()
 
@@ -113,12 +115,8 @@ class NcursesDisplay:
 
   def resize_views(self):
       self.ListView.set_view_position(0,0)
-      self.ListView.set_view_size(self.w-1,self.h*2/3-1)
+      self.ListView.set_view_size(self.w-1,self.h-2)
       self.ListView.set_content_size(self.w,self.h)
-
-      self.SummaryView.set_view_position(0,self.ListView.view_h+1)
-      self.SummaryView.set_view_size(self.w-1,self.h-self.ListView.view_h-3)
-      self.SummaryView.set_content_size(self.w,(self.h-1)*2/3)
 
       self.CommandView.set_view_position(0,self.h-1)
       self.CommandView.set_view_size(self.w-1,1)
