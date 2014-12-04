@@ -61,14 +61,14 @@ class NcursesDisplay:
       self.MonthlyView = MonthlyView(es)
 
       self.ListView = self.DailyView
-      self.CommandView = CommandView()
+      self.CommandView = CommandView(self.stdscr, self.w, self.h)
       self.resize_views()
 
       global resize_flag
 
       while True:
         self.ListView.display()
-        self.CommandView.display()
+        # self.CommandView.display()
         # curses.doupdate()
         
         c = self.stdscr.getch()
@@ -115,6 +115,8 @@ class NcursesDisplay:
           self.stdscr.refresh()
           self.ListView = self.MonthlyView
           self.resize_views()
+        elif c == ord(':'):
+          self.CommandView.edit()
 
         # time.sleep(0.01)
 
@@ -131,6 +133,6 @@ class NcursesDisplay:
       self.ListView.set_view_size(self.w-1,self.h-2)
       self.ListView.set_content_size(self.w,self.h)
 
-      self.CommandView.set_view_position(0,self.h-1)
-      self.CommandView.set_view_size(self.w-1,1)
-      self.CommandView.set_content_size(self.w,1)
+      # self.CommandView.set_view_position(0,self.h-1)
+      # self.CommandView.set_view_size(self.w-1,1)
+      # self.CommandView.set_content_size(self.w,1)
