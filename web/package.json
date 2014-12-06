@@ -5,7 +5,7 @@
     "browserify": "~3.44.x",
     "express": "^4.10.1",
     "gulp": "3.8.x",
-    "material-ui": "^0.2.1",
+    "material-ui": "^0.3.2",
     "moment": "^2.8.3",
     "moment-range": "^1.0.5",
     "react": "0.12.x",

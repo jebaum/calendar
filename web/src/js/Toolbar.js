@@ -31,7 +31,18 @@ var AppToolbar = React.createClass({
       <ToolbarGroup float="right" groupItems={groupItems} />,
     ];
 
-    return <Toolbar groups={groups} />;
+    return (
+      <Toolbar>
+        <ToolbarGroup key={0} float="left">
+          <DropDownMenu menuItems={modeMenuItems} onChange={this.onChange} />
+        </ToolbarGroup>
+        <ToolbarGroup key={1} float="right">
+          <Icon icon="navigation-chevron-left" onClick={Actions.setDateBackward} />
+          <Icon icon="navigation-chevron-right" onClick={Actions.setDateForward} />
+          <PaperButton label="Today" type="FLAT" onClick={Actions.setDate}/>
+        </ToolbarGroup>
+      </Toolbar>
+    );
   }
 })
 
