@@ -104,9 +104,13 @@ var Calendar = React.createClass({
       );
     });
 
+    var sameMonth = range.start.format('MMMM') === range.end.format('MMMM');
+    var title = range.start.format('MMMM Do') + ' - ' +
+      (sameMonth ? range.end.format('Do') : range.end.format('MMMM Do'));
+
     return (
       <div>
-        <h1>{range.start.format('MMMM Do') + ' - ' + range.end.format('Do')}</h1>
+        <h1>{title}</h1>
         <div className="calendar-wrapper calendar-wrapper-week">
           <Paper rounded={false}>
             <div className="calendar">
