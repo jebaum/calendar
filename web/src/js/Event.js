@@ -1,5 +1,6 @@
 var Actions = require('./Actions');
 var Dialog = require('material-ui').Dialog;
+var EventEditor = require('./EventEditor');
 var IconButton = require('material-ui').IconButton;
 var Link = require('./Link');
 var PropTypes = require('react').PropTypes;
@@ -12,23 +13,7 @@ var Event = React.createClass({
   },
 
   _onClick: function() {
-    var id = this.props.event.id;
-    Actions.setEvent({
-      id: id,
-      name: 'foo',
-      range: this.props.event.range
-    });
-
-    this.refs.editEvent.show();
-  },
-
-  _onDialogSubmit: function() {
-    console.log('dialog submit');
-  },
-
-  _onDialogCancel: function() {
-    console.log('dialog cancel');
-    this.refs.editEvent.dismiss();
+    this.refs.eventEditor.show();
   },
 
   _getTimeString: function() {
@@ -84,24 +69,17 @@ var Event = React.createClass({
       'minHeight': '' + (duration * 100) + '%',
     };
 
-    var dialogActions = [
-      { text: 'CANCEL', onClick: this._onDialogCancel },
-      { text: 'SUBMIT', onClick: this._onDialogSubmit }
-    ];
-
     return (
       <div className="event-block" style={style}>
-        <b className="event-time">
+        <span className="mui-font-style-menu">
           {this._getTimeString()}
-        </b>
+        </span>
 
         <br />
 
         <Link onClick={this._onClick}>{this.props.event.name}</Link>
 
-        <Dialog ref="editEvent" title="Edit Event" actions={dialogActions}>
-          Edit Event Here
-        </Dialog>
+        <EventEditor ref="eventEditor" event={this.props.event} />
       </div>
     );
   }
