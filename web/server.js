@@ -14,6 +14,16 @@ var events = [
     start: moment().endOf('week').subtract(20, 'hours').unix(),
     end: moment().endOf('week').subtract(12, 'hours').unix(),
   },
+  {
+    name: 'event3',
+    start: moment().endOf('week').subtract(32, 'hours').unix(),
+    end: moment().endOf('week').subtract(18, 'hours').unix(),
+  },
+  {
+    name: 'event4',
+    start: moment().startOf('week').add(2, 'days').unix(),
+    end: moment().startOf('week').add(3, 'days').unix(),
+  }
 ]
 
 app.use('/build', express.static('./build/'));
@@ -31,6 +41,11 @@ app.get('/', function (req, res) {
 app.get('/events', function (req, res) {
   res.send(JSON.stringify(events));
 });
+
+app.post('/events', function (req, res) {
+  events = JSON.parse(req.text);
+  res.send(JSON.stringify(events));
+})
 
 var server = app.listen(4567, function () {
 
