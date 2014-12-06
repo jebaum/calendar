@@ -17,6 +17,10 @@ var Actions = {
   setDateBackward: function() {
     Dispatcher.dispatch('SET_DATE_BACKWARD');
   },
+
+  setEvent: function(event) {
+    Dispatcher.dispatch('SET_EVENT', event);
+  },
 };
 
 module.exports = Actions;

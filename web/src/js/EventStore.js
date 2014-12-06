@@ -25,9 +25,20 @@ function getEvents() {
 
 function addEvents(events) {
   _.each(events, function(event) {
+    event.id = _events.length;
     _events.push(event);
   });
 
+  notify();
+}
+
+function clearEvents() {
+  _events = [];
+  notify();
+}
+
+function setEvent(event) {
+  _events[event.id] = event;
   notify();
 }
 
@@ -50,6 +61,8 @@ function eventTranslator(apiEvent) {
     ),
   }
 }
+
+Dispatcher.register('SET_EVENT', setEvent);
 
 module.exports = {
   getEvents: getEvents,

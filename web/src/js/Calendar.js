@@ -2,13 +2,12 @@
 
 var CalendarStore = require('./CalendarStore');
 var DateUtil = require('./DateUtil');
+var Event = require('./Event');
 var EventStore = require('./EventStore');
 var React = require('react');
 var Paper = require('material-ui').Paper;
 var PropTypes = require('react').PropTypes;
 var StateFromStore = require('./StateFromStore');
-var Toolbar = require('material-ui').Toolbar;
-var ToolbarGroup = require('material-ui').ToolbarGroup;
 var classSet = require('react/addons').addons.classSet;
 var moment = require('moment-range');
 var _ = require('underscore');
@@ -23,34 +22,6 @@ var Cell = React.createClass({
     return (
       <div className={classes}>
           {this.props.children}
-      </div>
-    );
-  }
-});
-
-var EventBlock = React.createClass({
-  propTypes: {
-    range: PropTypes.object.isRequired,
-    event: PropTypes.object.isRequired,
-  },
-
-  render: function() {
-    var eventRange = this.props.event.range;
-    var range = this.props.range;
-    var total = range.end - range.start;
-    var topOffset = Math.max(eventRange.start - range.start, 0) / total;
-    var duration = (eventRange.end - eventRange.start) / total;
-
-    var style = {
-      'top': '' + (topOffset * 100) + '%',
-      'minHeight': '' + (duration * 100) + '%',
-    }
-
-    return (
-      <div
-        className="event-block"
-        style={style}>
-        {this.props.event.text}
       </div>
     );
   }
@@ -82,12 +53,6 @@ var Calendar = React.createClass({
     type: PropTypes.oneOf(['day', 'week', 'month', 'year']),
   },
 
-  getInitialState: function() {
-    return {
-
-    };
-  },
-
   renderDay: function(events, date) {
     var dayRange = DateUtil.getDay(date);
     var eventBlocks = _.map(
@@ -95,11 +60,7 @@ var Calendar = React.createClass({
         return dayRange.overlaps(event.range);
       }),
       function(event) {
-        var intersectingEvent = {
-          range: dayRange.intersect(event.range),
-          text: event.name,
-        };
-        return <EventBlock event={intersectingEvent} range={dayRange} />;
+        return <Event event={event} range={dayRange} />;
     });
 
     return (
@@ -129,11 +90,7 @@ var Calendar = React.createClass({
           return dayRange.overlaps(event.range);
         }),
         function(event) {
-          var intersectingEvent = {
-            range: dayRange.intersect(event.range),
-            text: event.name,
-          };
-          return <EventBlock event={intersectingEvent} range={dayRange} />;
+          return <Event event={event} range={dayRange} />;
       });
 
       var isToday = day.date() === moment().date();
