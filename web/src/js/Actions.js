@@ -18,6 +18,10 @@ var Actions = {
     Dispatcher.dispatch('SET_DATE_BACKWARD');
   },
 
+  addEvent: function(event) {
+    Dispatcher.dispatch('ADD_EVENT', event);
+  },
+
   setEvent: function(event) {
     Dispatcher.dispatch('SET_EVENT', event);
   },

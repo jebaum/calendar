@@ -7,7 +7,7 @@ var moment = require('moment-range');
 
 var EventEditor = React.createClass({
   propTypes: {
-    event: PropTypes.object.isRequired,
+    event: PropTypes.object,
   },
 
   show: function() {
@@ -22,17 +22,20 @@ var EventEditor = React.createClass({
     var end = moment(
       this.refs.end.getValue(), 'YYYY-MM-DDTHH:mm'
     );
-    var event = this.props.event;
+    var event = this.props.event || {};
     event.name = name;
     event.range = moment().range(start, end);
-    Actions.setEvent(event);
+    if (event.id)
+      Actions.setEvent(event);
+    else
+      Actions.addEvent(event);
     this.refs.editEvent.dismiss();
   },
 
   render: function() {
     var event = this.props.event;
-    var name = event.name;
-    var range = event.range;
+    var name = event ? event.name : null;
+    var range = event ? event.range : null;
 
     var dialogActions = [
       { text: 'CANCEL', onClick: this._onDialogCancel },
@@ -40,11 +43,12 @@ var EventEditor = React.createClass({
     ];
     return (
       <Dialog ref="editEvent" title="Edit Event" actions={dialogActions}>
-        <Input placeholder="Name" name="name" ref="name" type="text" defaultValue={name} />
+        <Input placeholder="Name" name="name" ref="name" type="text"
+          defaultValue={name} />
         <Input placeholder="Start" name="start" ref="start" type="datetime-local"
-          defaultValue={range.start.format('YYYY-MM-DDTHH:mm')} />
+          defaultValue={range ? range.start.format('YYYY-MM-DDTHH:mm') : null} />
         <Input placeholder="End" name="end" ref="end" type="datetime-local"
-          defaultValue={range.end.format('YYYY-MM-DDTHH:mm')} />
+          defaultValue={range ? range.end.format('YYYY-MM-DDTHH:mm') : null} />
       </Dialog>
     );
   }

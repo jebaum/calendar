@@ -62,6 +62,9 @@ function eventTranslator(apiEvent) {
   }
 }
 
+Dispatcher.register('ADD_EVENT', function(event) {
+  addEvents([event]);
+});
 Dispatcher.register('SET_EVENT', setEvent);
 
 module.exports = {
