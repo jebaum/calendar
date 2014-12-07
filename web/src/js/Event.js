@@ -10,6 +10,7 @@ var Event = React.createClass({
   propTypes: {
     range: PropTypes.object.isRequired,
     event: PropTypes.object.isRequired,
+    zDepth: PropTypes.number,
   },
 
   _onClick: function() {
@@ -67,18 +68,20 @@ var Event = React.createClass({
     var style = {
       'top': '' + (topOffset * 100) + '%',
       'minHeight': '' + (duration * 100) + '%',
+      'zIndex': '' + this.props.zDepth,
     };
 
     return (
-      <div className="event-block" style={style}>
-        <span className="mui-font-style-menu">
-          {this._getTimeString()}
-        </span>
+      <div>
+        <div className="event-block" style={style}>
+          <span className="event-time">
+            {this._getTimeString()}
+          </span>
 
-        <br />
+          <br />
 
-        <Link onClick={this._onClick}>{this.props.event.name}</Link>
-
+          <Link onClick={this._onClick}>{this.props.event.name}</Link>
+        </div>
         <EventEditor ref="eventEditor" event={this.props.event} />
       </div>
     );

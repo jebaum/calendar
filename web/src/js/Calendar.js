@@ -57,12 +57,18 @@ var Calendar = React.createClass({
 
   renderDay: function(events, date) {
     var dayRange = DateUtil.getDay(date);
+    var i = 0;
     var eventBlocks = _.map(
-      _.filter(events, function(event) {
-        return dayRange.overlaps(event.range);
+      _.sortBy(
+        _.filter(events, function(event) {
+          return dayRange.overlaps(event.range);
+        }),
+        function(event) {
+          return event.range.start;
       }),
       function(event) {
-        return <Event event={event} range={dayRange} />;
+        i++;
+        return <Event event={event} range={dayRange} zDepth={i} />;
     });
 
     return (
@@ -75,7 +81,9 @@ var Calendar = React.createClass({
                 <tr>
                   <Cell>
                     {dayRange.start.date()}
-                    {eventBlocks}
+                    <div className="events-wrapper">
+                      {eventBlocks}
+                    </div>
                   </Cell>
                 </tr>
               </tbody>
@@ -91,12 +99,18 @@ var Calendar = React.createClass({
     var cells = [];
     range.by('days', function(day) {
       var dayRange = moment().range(day, moment(day).add(1, 'days'));
+      var i = 0;
       var eventBlocks = _.map(
-        _.filter(events, function(event) {
-          return dayRange.overlaps(event.range);
+        _.sortBy(
+          _.filter(events, function(event) {
+            return dayRange.overlaps(event.range);
+          }),
+          function(event) {
+            return event.range.start;
         }),
         function(event) {
-          return <Event event={event} range={dayRange} />;
+          i++;
+          return <Event event={event} range={dayRange} zDepth={i} />;
       });
 
       var isToday = day.date() === moment().date();
@@ -105,7 +119,9 @@ var Calendar = React.createClass({
       cells.push(
         <Cell today={isToday} disabled={isDisabled} key={key}>
           {day.date()}
-          {eventBlocks}
+          <div className="events-wrapper">
+            {eventBlocks}
+          </div>
         </Cell>
       );
     });

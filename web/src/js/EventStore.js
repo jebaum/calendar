@@ -62,6 +62,7 @@ function notify() {
 function eventTranslator(apiEvent) {
   return {
     name: apiEvent.name,
+    description: apiEvent.description,
     range: moment().range(
       moment(apiEvent.start * 1000),
       moment(apiEvent.end * 1000)
@@ -75,6 +76,7 @@ function translateEvents(events) {
     function(event) {
       return {
         name: event.name,
+        description: event.description,
         start: event.range.start.unix(),
         end: event.range.end.unix(),
       };
