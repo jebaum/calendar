@@ -1,22 +1,21 @@
 package yamlcal.calendar;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import static spark.Spark.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException; // thrown by ObjectMapper.writeValueAsString()
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import yamlcal.type.Event;
 import yamlcal.type.Title;
@@ -25,56 +24,93 @@ import yamlcal.type.Description;
 import yamlcal.type.Category;
 import yamlcal.type.StartTime;
 import yamlcal.type.EndTime;
-import yamlcal.type.DueDate;
+// import yamlcal.type.DueDate;
+
+import org.yaml.snakeyaml.Yaml;
 
 public class Server {
 
     // TODO: there are a handful of magic values through the current codebase
     // API endpoints, status codes, jackson annotations, etc. fix this
-    public static void main(String[] args) throws JsonProcessingException {
-        Title mytitle             = new Title("this is my title");
-        Location mylocation       = new Location("here i am");
-        Description mydescription = new Description("sup");
-        Category mycategory       = new Category("important");
-        StartTime mystart         = new StartTime(1414000000000l);
-        EndTime myend             = new EndTime(1414005000000l);
+    public static void main(String[] args) throws JsonProcessingException, FileNotFoundException, Exception {
 
-        Title mytitle2             = new Title("another title");
-        Location mylocation2       = new Location("nowhere");
-        Description mydescription2 = new Description("things are weird");
-        Category mycategory2       = new Category("unimportant");
-        StartTime mystart2         = new StartTime(1414010000000l);
-        EndTime myend2             = new EndTime(1414013000000l);
+        // http://yaml-online-parser.appspot.com/
+        InputStream input = new FileInputStream(new File("calendar.yaml"));
+        Yaml calReader    = new Yaml();
 
-        Event myevent  = new Event(mytitle, mylocation, mydescription, mycategory, mystart, myend);
-        Event myevent2 = new Event(mytitle2, mylocation2, mydescription2, mycategory2, mystart2, myend2);
+        @SuppressWarnings("unchecked")
+        Map<String, List<Map<String, String>>> eventList = (Map<String, List<Map<String, String>>>) calReader.load(input);
 
+        // TODO: duplicate keys to the map may cause problems? two different events with the same name?
         List<Event> calendarList = new ArrayList<Event>();
-        calendarList.add(myevent);
-        calendarList.add(myevent2);
+        for (String eventTitleString : eventList.keySet()) {
+            Title eventTitle = new Title(eventTitleString);
+
+            List<Map<String, String>> eventAttributeList = eventList.get(eventTitleString);
+            Map<String, String> eventAttributeMap        = new HashMap<String, String>();
+            for (Map<String, String> eventAttribute : eventAttributeList) {
+                eventAttributeMap.putAll(eventAttribute);
+            }
+
+            Location eventLocation       = new Location(eventAttributeMap.get("location"));
+            Description eventDescription = new Description(eventAttributeMap.get("description"));
+            Category eventCategory       = new Category(eventAttributeMap.get("category"));
+
+            String eventStartTimeString = eventAttributeMap.get("start");
+            StartTime eventStartTime    = null;
+            // TODO: need a more robust way to parse dates, or at least need to allow for not specifying time?
+            if (eventStartTimeString != null) {
+                DateFormat formatter = new SimpleDateFormat("MM/dd/yy h:mm a");
+                Date date            = (Date)formatter.parse(eventStartTimeString);
+                eventStartTime       = new StartTime(date);
+            }
+
+            String eventEndTimeString = eventAttributeMap.get("end");
+            EndTime eventEndTime      = null;
+            if (eventStartTime != null) {
+                DateFormat formatter = new SimpleDateFormat("MM/dd/yy h:mm a");
+                Date date            = (Date)formatter.parse(eventEndTimeString);
+                eventEndTime         = new EndTime(date);
+            }
+
+            Event someEvent = new Event(eventTitle, eventLocation, eventDescription, eventCategory, eventStartTime, eventEndTime);
+            calendarList.add(someEvent);
+            System.out.println("Event: " + someEvent + " added to calendar list");
+        }
+
 
         ObjectMapper mapper = new ObjectMapper();
-
-        /*
-         * List<Event> calendarList2;
-         * try {
-         *     calendarList2 = mapper.readValue(mapper.writeValueAsString(calendarList), new TypeReference<List<Event>>(){});
-         * } catch (JsonProcessingException e) {
-         *     e.printStackTrace();
-         *     calendarList2 = null;
-         * } catch (IOException e) {
-         *     e.printStackTrace();
-         *     calendarList2 = null;
-         * }
-         */
+        System.out.println(mapper.writeValueAsString(calendarList));
 
         /*
          * BEGIN ENDPOINTS
          */
+
         get("/date_start/:start/date_end/:end", (request, response) -> {
             String getResponse;
-            System.out.println("Eventually this will return the events in between "
-                            + request.params(":start") + " and " + request.params(":end"));
+            long rangeStart, rangeEnd;
+            try {
+                rangeStart = Long.parseLong(request.params(":start"), 10);
+                rangeEnd   = Long.parseLong(request.params(":end"), 10);
+                System.out.println("start: " + rangeStart + ", end: " + rangeEnd);
+            } catch (NumberFormatException e) {
+                rangeStart = -1;
+                rangeEnd   = -1;
+                System.out.println("Passed time parameters were bad");
+                e.printStackTrace();
+            }
+
+            for (Event e : calendarList) {
+                if (e.getStartTime().valueOf() != null) {
+                    long msTimestamp = e.getStartTime().valueOf().getTime();
+                    msTimestamp /= 1000;
+                    if (msTimestamp >= rangeStart && msTimestamp <= rangeEnd) {
+                        // TODO: need to build up json output
+                        System.out.println(e.getTitle());
+                    }
+                }
+            }
+
             try {
                 getResponse = mapper.writeValueAsString(calendarList);
                 response.status(201);
@@ -87,6 +123,8 @@ public class Server {
         });
 
         post("/", (request, response) -> {
+            // TODO should events received via post be added to some "master" calendarList, e.g. the existing one?
+            // should they be immediately written to the calendar file?
             System.out.println("POST:\n" + request.body());
             return "Thanks for the post!\n" + request.body() + "\n";
         });

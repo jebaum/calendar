@@ -1,13 +1,16 @@
 package yamlcal.type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class Title {
     private final String title;
 
     public Title(String title) {
-        this.title = title;
+        if (title == null) {
+            this.title = "";
+        } else {
+            this.title = title;
+        }
     }
 
     @Override public String toString() {

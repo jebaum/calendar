@@ -6,7 +6,11 @@ public class Location {
     private String location;
 
     public Location(String location) {
-        this.location = location;
+        if (location == null) {
+            this.location = "";
+        } else {
+            this.location = location;
+        }
     }
 
     @Override public String toString() {
