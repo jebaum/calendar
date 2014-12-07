@@ -9,7 +9,7 @@ var App = React.createClass({
   render: function() {
     return (
       <AppCanvas predefinedLayout={1}>
-        <AppBar title="YAMLCal" />
+        <AppBar title="YAMLCal" showMenuIconButton={false} />
         <div className="mui-app-content-canvas with-nav">
           <AppToolbar />
           <div className="subContent">
