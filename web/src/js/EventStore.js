@@ -17,7 +17,7 @@ function syncEvents() {
     );
   } else {
     API.post(
-      {events: _events},
+      {events: translateEvents(_events)},
       console.log,
       console.error
     );
@@ -67,6 +67,18 @@ function eventTranslator(apiEvent) {
       moment(apiEvent.end * 1000)
     ),
   }
+}
+
+function translateEvents(events) {
+  return _.map(
+    events,
+    function(event) {
+      return {
+        name: event.name,
+        start: event.range.start.unix(),
+        end: event.range.end.unix(),
+      };
+  });
 }
 
 Dispatcher.register('ADD_EVENT', function(event) {
