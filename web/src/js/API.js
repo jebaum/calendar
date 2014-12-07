@@ -6,10 +6,7 @@ var API = {
 
     request
       .get('/events')
-      .query({
-        start_date: params.startDate.unix(),
-        end_date: params.endDate.unix(),
-      })
+      .query(params)
       .end(function(res) {
         if (res.ok) {
           if (callback) {
@@ -17,6 +14,26 @@ var API = {
           }
         } else {
           console.error('Request error: ' + res.text);
+          if (error) {
+            error(res.text);
+          }
+        }
+      });
+  },
+
+  post: function(params, callback, error) {
+    params = params || {};
+
+    request
+      .post('/events')
+      .send(params)
+      .end(function(res) {
+        if (res.ok) {
+          if (callback) {
+            callback(JSON.parse(res.text));
+          }
+        } else {
+          console.error('Failed to POST');
           if (error) {
             error(res.text);
           }

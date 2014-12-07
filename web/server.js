@@ -1,3 +1,4 @@
+var bodyParser = require('body-parser')
 var express = require('express')
 var fs = require('fs');
 var moment = require('moment');
@@ -27,6 +28,7 @@ var events = [
 ]
 
 app.use('/build', express.static('./build/'));
+app.use(bodyParser.json());
 
 app.get('/', function (req, res) {
   fs.readFile('index.html', 'utf-8', function(err, data) {
@@ -43,7 +45,7 @@ app.get('/events', function (req, res) {
 });
 
 app.post('/events', function (req, res) {
-  events = JSON.parse(req.text);
+  events = req.body.events;
   res.send(JSON.stringify(events));
 })
 

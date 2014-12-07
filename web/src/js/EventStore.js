@@ -6,20 +6,26 @@ var _ = require('underscore');
 var _events = [];
 var _listeners = [];
 
-function getEvents() {
+function syncEvents() {
   if (_events.length === 0) {
     API.get(
-      {
-        startDate: moment(),
-        endDate: moment(),
-      },
+      null,
       function(apiEvents) {
         return addEvents(_.map(apiEvents, eventTranslator));
       },
       console.error
     );
+  } else {
+    API.post(
+      {events: _events},
+      console.log,
+      console.error
+    );
   }
+}
 
+function getEvents() {
+  syncEvents();
   return _events;
 }
 
@@ -39,6 +45,7 @@ function clearEvents() {
 
 function setEvent(event) {
   _events[event.id] = event;
+
   notify();
 }
 
