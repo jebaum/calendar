@@ -1,10 +1,12 @@
 'use strict';
 
+var Actions = require('./Actions');
 var CalendarStore = require('./CalendarStore');
 var DateUtil = require('./DateUtil');
 var Event = require('./Event');
 var EventStore = require('./EventStore');
 var React = require('react');
+var Link = require('./Link');
 var Paper = require('material-ui').Paper;
 var PropTypes = require('react').PropTypes;
 var StateFromStore = require('./StateFromStore');
@@ -145,9 +147,19 @@ var Calendar = React.createClass({
         (day.date() === moment().date() && day.month() === moment().month());
       var isDisabled = day.month() !== date.month();
       var key = '' + day.date() + '-' + day.month();
+
+      var dayRange = moment().range(day, moment(day).add(1, 'days'));
+      var numEvents = _.filter(events, function(event) {
+        return dayRange.overlaps(event.range);
+      }).length;
+      var setDate = function() {
+        Actions.setDate(day);
+        Actions.setCalendar('day');
+      };
       row.push(
         <Cell today={isToday} disabled={isDisabled} key={key}>
-          {day.date()}
+          <Link onClick={setDate}>{day.date()}</Link>
+          {numEvents ? <span className="num-events">{numEvents}</span> : null}
         </Cell>
       );
       i++;

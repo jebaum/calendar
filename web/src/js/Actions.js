@@ -7,7 +7,7 @@ var Actions = {
   },
 
   setDate: function(date) {
-    Dispatcher.dispatch('SET_DATE', moment());
+    Dispatcher.dispatch('SET_DATE', date || moment());
   },
 
   setDateForward: function() {

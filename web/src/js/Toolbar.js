@@ -1,13 +1,23 @@
 var Actions = require('./Actions');
+var CalendarStore = require('./CalendarStore');
 var DropDownMenu = require('material-ui').DropDownMenu;
 var EventEditor = require('./EventEditor');
 var Icon = require('material-ui').Icon;
 var FlatButton = require('material-ui').FlatButton;
 var React = require('react');
+var StateFromStore = require('./StateFromStore');
 var Toolbar = require('material-ui').Toolbar;
 var ToolbarGroup = require('material-ui').ToolbarGroup;
+var _ = require('underscore');
 
 var AppToolbar = React.createClass({
+  mixins: [StateFromStore({
+    calendarMode: {
+      store: CalendarStore,
+      fetch: function(store, fetchParams) {
+        return store.getMode();
+      }
+  }})],
 
   _onChange: function(e, index, item) {
     Actions.setCalendar(item.value);
@@ -24,11 +34,20 @@ var AppToolbar = React.createClass({
       { value: 'day', text: 'Day'},
     ];
 
+    var selectedIndex = _.indexOf(
+      _.pluck(modeMenuItems, 'value'),
+      this.state.calendarMode
+    );
+
     return (
       <div>
         <Toolbar>
           <ToolbarGroup key={0} float="left">
-            <DropDownMenu menuItems={modeMenuItems} onChange={this._onChange} />
+            <DropDownMenu
+              menuItems={modeMenuItems}
+              onChange={this._onChange}
+              selectedIndex={selectedIndex}
+            />
           </ToolbarGroup>
           <ToolbarGroup key={1} float="right">
             <Icon icon="navigation-chevron-left" onClick={Actions.setDateBackward} />
