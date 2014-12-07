@@ -20,9 +20,9 @@ var Cell = React.createClass({
       'cell-disabled': this.props.disabled,
     });
     return (
-      <div className={classes}>
+      <td className={classes}>
           {this.props.children}
-      </div>
+      </td>
     );
   }
 });
@@ -68,12 +68,16 @@ var Calendar = React.createClass({
         <h1>{date.format('dddd, MMMM Do')}</h1>
         <div className="calendar-wrapper calendar-wrapper-day">
           <Paper rounded={false}>
-            <div className="calendar">
-              <Cell>
-                {dayRange.start.date()}
-                {eventBlocks}
-              </Cell>
-            </div>
+            <table className="calendar">
+              <tbody>
+                <tr>
+                  <Cell>
+                    {dayRange.start.date()}
+                    {eventBlocks}
+                  </Cell>
+                </tr>
+              </tbody>
+            </table>
           </Paper>
         </div>
       </div>
@@ -113,9 +117,13 @@ var Calendar = React.createClass({
         <h1>{title}</h1>
         <div className="calendar-wrapper calendar-wrapper-week">
           <Paper rounded={false}>
-            <div className="calendar">
-              {cells}
-            </div>
+            <table className="calendar">
+              <tbody>
+                <tr>
+                  {cells}
+                </tr>
+              </tbody>
+            </table>
           </Paper>
         </div>
       </div>
@@ -129,33 +137,48 @@ var Calendar = React.createClass({
       range.end.endOf('week')
     );
 
-    var cells = [];
+    var rows = [];
     var i = 0;
+    var row = [];
     fullRange.by('day', function(day) {
       var isToday =
         (day.date() === moment().date() && day.month() === moment().month());
       var isDisabled = day.month() !== date.month();
       var key = '' + day.date() + '-' + day.month();
-      cells.push((
+      row.push(
         <Cell today={isToday} disabled={isDisabled} key={key}>
           {day.date()}
         </Cell>
-      ));
+      );
       i++;
       if (i === 7) {
-        cells.push(<br />);
+        rows.push(
+          <tr>
+            {row}
+          </tr>
+        );
         i = 0;
+        row = []
       }
     });
+    if (row.length !== 0) {
+      rows.push(
+        <tr>
+          {row}
+        </tr>
+      );
+    }
 
     return (
       <div>
         <h1>{date.format('MMMM')}</h1>
         <div className="calendar-wrapper calendar-wrapper-month">
           <Paper rounded={false}>
-            <div className="calendar">
-              {cells}
-            </div>
+            <table className="calendar">
+              <tbody>
+                {rows}
+              </tbody>
+            </table>
           </Paper>
         </div>
       </div>

@@ -10,34 +10,25 @@
       .lh-calc(min-height, ~'100% - @{app-bar-height}');
 
       .subContent {
-        max-width: (@desktop-keyline-increment * 14);
+        max-width: 90%;
         height: 100%;
-        .lh-calc(width, ~'100% - @{subNavWidth}');
         padding: @desktop-gutter;
       }
     }
   }
 }
 
-.calendar-wrapper-week, .calendar-wrapper-month {
-  width: 700px;
-}
-
-.calendar-wrapper-day {
-  width: 100px;
-}
-
 .calendar-wrapper-month {
 
   .cell {
-    height: 91px;
+    min-height: 100px;
   }
 }
 
 .calendar-wrapper-week, .calendar-wrapper-day {
 
   .cell {
-    height: 301px;
+    min-height: 300px;
   }
 }
 
@@ -45,17 +36,16 @@
   display: table;
 
   .calendar {
+    table-layout: fixed;
     width: 100%;
 
     .cell {
-      width: 101px;
+      min-width: 125px;
+      min-height: 100px;
       border: thin solid @grey-300;
       vertical-align: top;
       padding: 4px;
       position: relative;
-      display: inline-block;
-      margin-top: -1px;
-      margin-left: -1px;
 
       .event-block {
         background-color: @light-blue-200;
