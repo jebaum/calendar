@@ -35,7 +35,7 @@ var EventEditor = React.createClass({
   render: function() {
     var event = this.props.event;
     var name = event ? event.name : null;
-    var description = event ? event.name : null;
+    var description = event ? event.description : null;
     var range = event ? event.range : null;
 
     var dialogActions = [
@@ -46,8 +46,8 @@ var EventEditor = React.createClass({
       <Dialog ref="editEvent" title="Edit Event" actions={dialogActions}>
         <Input placeholder="Name" name="name" ref="name" type="text"
           defaultValue={name} />
-        <Input placeholder="Name" name="desciption" ref="description" type="text"
-          defaultValue={description} />
+        <Input placeholder="Description" name="description" ref="description" type="text"
+          defaultValue={description} multiline={true} />
         <Input placeholder="Start" name="start" ref="start" type="datetime-local"
           defaultValue={range ? range.start.format('YYYY-MM-DDTHH:mm') : null} />
         <Input placeholder="End" name="end" ref="end" type="datetime-local"

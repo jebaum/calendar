@@ -3,6 +3,9 @@
 
 .mui-app-canvas {
   height: 100%;
+  .mui-app-bar {
+    z-index: 101;
+  }
 
   .mui-app-content-canvas {
     &.with-nav {
@@ -34,19 +37,28 @@
       margin-top: 10px;
       position: relative;
       height: 450px;
+
+      h4, h6 {
+        padding-top: 0px;
+        margin-bottom: 0px;
+      }
     }
   }
 }
 
-.calendar-wrapper-day {
-  .event-block {
-    padding-left: 1em;
-    padding-right: 1em;
-    .lh-box-shadow(0 1px 4px rgba(0, 0, 0, 0.24));
+.event-block:hover {
+  z-index: 100 !important;
+}
 
-    .event-time {
-      float: right;
-    }
+.calendar-wrapper-week {
+  .link {
+    display: block;
+  }
+}
+
+.calendar-wrapper-day {
+  .event-time {
+    float: right;
   }
 }
 
@@ -65,11 +77,21 @@
       position: relative;
 
       .event-block {
-        opacity: 0.6;
+        padding: 5px;
+        opacity: 1.0;
         background-color: @light-blue-200;
         width: 90%;
         position: absolute;
-        border: thin solid @grey-300;
+        .lh-box-shadow(0 0 10px @grey-600);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .event-block-short {
+        padding: 2px;
+
+        .link {
+          display: inline-block;
+        }
       }
     }
 
