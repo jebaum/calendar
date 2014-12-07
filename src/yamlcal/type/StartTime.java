@@ -7,13 +7,10 @@ import java.util.Date;
 
 public class StartTime {
     private final Date date;
-    @JsonProperty("startTime")
-    private final long timeStamp;
 
     @JsonCreator
-    public StartTime(@JsonProperty("startTime") long timeStamp) {
-        this.date      = new Date(timeStamp);
-        this.timeStamp = timeStamp;
+    public StartTime(@JsonProperty("startTime") Date date) {
+        this.date = date;
     }
 
     @Override public String toString() {
@@ -21,8 +18,12 @@ public class StartTime {
         String NEW_LINE = System.getProperty("line.separator");
 
         result.append(this.getClass().getName() + " Object {" + NEW_LINE);
-        result.append(" Date: " + this.date.toString()   + NEW_LINE);
-        result.append(" Timestamp (ms): " + this.timeStamp + NEW_LINE);
+        if (this.date != null) {
+            result.append(" Date: " + this.date.toString()   + NEW_LINE);
+        } else {
+            result.append(" Date: null" + NEW_LINE);
+        }
+
         result.append("}");
 
         return result.toString();
@@ -33,7 +34,11 @@ public class StartTime {
     }
 
     @JsonProperty("startTime")
-    public final long getMilliseconds() {
-        return this.timeStamp;
+    public final Long getTime() {
+        if (this.date == null) {
+            return null;
+        } else {
+            return this.date.getTime();
+        }
     }
 }

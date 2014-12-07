@@ -6,7 +6,11 @@ public class Category {
     private String category;
 
     public Category(String category) {
-        this.category = category;
+        if (category == null) {
+            this.category = "";
+        } else {
+            this.category = category;
+        }
     }
 
     @Override public String toString() {
