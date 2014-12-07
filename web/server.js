@@ -7,6 +7,7 @@ var app = express();
 var events = [
   {
     name: 'event1',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     start: moment().startOf('week').add(5, 'hours').unix(),
     end: moment().startOf('week').add(6, 'hours').unix(),
   },
@@ -22,6 +23,7 @@ var events = [
   },
   {
     name: 'event4',
+    description: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     start: moment().startOf('week').add(2, 'days').unix(),
     end: moment().startOf('week').add(3, 'days').unix(),
   }
@@ -46,6 +48,7 @@ app.get('/events', function (req, res) {
 
 app.post('/events', function (req, res) {
   events = req.body.events;
+  console.log(events);
   res.send(JSON.stringify(events));
 })
 
