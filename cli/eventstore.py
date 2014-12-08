@@ -14,6 +14,8 @@ class EventStore():
                     'category': None,
                     'location': None}
 
+    self.event_count = 0
+
   # 
   # EXTERNAL
   # 
@@ -32,7 +34,8 @@ class EventStore():
         e.title = "Event " + str(i)
         e.date_from_time_seconds()
         e.description = e.startDate.strftime("%B %d %Y, %H:%M:%S")
-        e.id = len(events)
+        e.id = self.event_count
+        self.event_count += 1
         events.append(e)
 
       self.cache = (events, 1)
@@ -45,6 +48,22 @@ class EventStore():
     Update e on cache and server
     """
     pass
+
+  def delete_event(self, id_str):
+    """
+    Delete event with id = id_str
+    """
+    id = -1
+    try:
+      id = int(id_str)
+    except Exception as e:
+      return "ID '%s' not recognized as integer" % (id_str)
+
+    if id > self.event_count or id < 0 or len(filter(lambda e: e.id == id, self.cache[0])) == 0:
+      return "Event with id = '%s' does not exist" % (str(id))
+
+    self.cache = (filter(lambda e: e.id != id, self.cache[0]), self.cache[1])
+    return "Deleted event with id = '%s'" % (str(id))
 
   # 
   # INTERNAL

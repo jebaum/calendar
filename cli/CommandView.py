@@ -48,7 +48,14 @@ class CommandView(object):
         self.response = 'Filter not recognized, must be format key=xxx'
         return
       self.response = self.EventStore.add_filter(match.group(1).strip(), match.group(2).strip())
-      # self.response = "1:%s, 2:%s" % (match.group(1), match.group(2))
+    elif 'update' in self.cmd:
+      pass
+    elif 'delete' in self.cmd:
+      match = re.match(r'delete id=(.*)', self.cmd, re.DOTALL)
+      if match == None:
+        self.response = 'ID not recognized, must be format "delete id=xxx"'
+        return
+      self.response = self.EventStore.delete_event(match.group(1).strip())
 
   def draw_help(self):
     rectangle(self.stdscr,self.y-4,self.x,self.y-1, self.w)
