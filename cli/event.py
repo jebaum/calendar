@@ -3,6 +3,7 @@ import json, datetime
 class Event(object):
     def __init__(self):
         self.title = None
+        self.id = 0
         self.startTime = 0
         self.endTime = 0
         self.location = None

@@ -32,6 +32,7 @@ class EventStore():
         e.title = "Event " + str(i)
         e.date_from_time_seconds()
         e.description = e.startDate.strftime("%B %d %Y, %H:%M:%S")
+        e.id = len(events)
         events.append(e)
 
       self.cache = (events, 1)

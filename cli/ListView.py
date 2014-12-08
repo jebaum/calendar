@@ -96,6 +96,11 @@ class ListView(ScrollableView):
     locationStr = "@%s" % (e.location)
     self.pad.addstr(y,xoff,locationStr)
 
+    # ID
+    idStr = "id: %s" % (e.id)
+    xoff = self.content_w-1-len(idStr)
+    self.pad.addstr(y,xoff,idStr)
+
   def draw_view_header(self):
     self.pad.addstr(0,3,self.view_header)
 
