@@ -6,7 +6,7 @@ from event import Event
 class EventStore():
   def __init__(self):
     # cache: tuple (events:list, last_update:datetime)
-    self.cache = ([], None)
+    self.cache = None
 
     self.filters = {'date': None,
                     'title': None,
@@ -24,7 +24,7 @@ class EventStore():
     Return events, fetching from server as needed
     Applies any active filters
     """
-    if self.cache[1] is None:
+    if self.cache is None:
       events = []
       for i in range(200):
         e = Event()
@@ -38,10 +38,10 @@ class EventStore():
         self.event_count += 1
         events.append(e)
 
-      self.cache = (events, 1)
+      self.cache = events
       # self.cache = (self.get_events_from_json_file("json.txt"), None)
 
-    return self.filter_events(self.cache[0])
+    return self.filter_events(self.cache)
 
   def update_event(self, id_str, kvs):
     """
@@ -51,7 +51,7 @@ class EventStore():
     if err != "":
       return err
 
-    events = self.cache[0]
+    events = self.cache
     for i in range(len(events)):
       e = events[i]
       if e.id != id:
@@ -61,8 +61,7 @@ class EventStore():
           setattr(e,k,v)
         else:
           return "Key '%s' unrecognized" % (k)
-    self.cache = (events, self.cache[1])
-
+    self.cache = events
 
   def delete_event(self, id_str):
     """
@@ -72,7 +71,7 @@ class EventStore():
     if err != "":
       return err
 
-    self.cache = (filter(lambda e: e.id != id, self.cache[0]), self.cache[1])
+    self.cache = filter(lambda e: e.id != id, self.cache)
     return "Deleted event with id = '%s'" % (str(id))
 
   def new_event(self, start, end):
@@ -94,9 +93,8 @@ class EventStore():
     e.id = self.event_count
     self.event_count += 1
     e.title = "Event " + str(e.id)
-    events = self.cache[0]
-    events.append(e)
-    self.cache = (events, self.cache[1])
+
+    self.cache.append(e)
 
     return "New event with id %s" % (e.id)
 
@@ -136,7 +134,7 @@ class EventStore():
     except Exception as e:
       return id, "ID '%s' not recognized as integer" % (id_str)
 
-    if id > self.event_count or id < 0 or len(filter(lambda e: e.id == id, self.cache[0])) != 1:
+    if id > self.event_count or id < 0 or len(filter(lambda e: e.id == id, self.cache)) != 1:
       return id, "Event with id = '%s' does not exist" % (str(id))
 
     return id, ""
