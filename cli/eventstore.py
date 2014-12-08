@@ -75,6 +75,31 @@ class EventStore():
     self.cache = (filter(lambda e: e.id != id, self.cache[0]), self.cache[1])
     return "Deleted event with id = '%s'" % (str(id))
 
+  def new_event(self, start, end):
+    """
+    Creates new event starting start minutes from now and ending end minutes from now
+    """
+    try:
+      start = int(start)
+      end = int(end)
+    except Exception as e:
+      return "Start and End must be integers"
+
+    e = Event()
+    seconds_since_epoch = (datetime.datetime.now() - datetime.datetime.utcfromtimestamp(0)).total_seconds()
+    e.startTime = seconds_since_epoch + start*60
+    e.endTime = seconds_since_epoch + end*60
+    e.date_from_time_seconds()
+    e.description = e.startDate.strftime("%B %d %Y, %H:%M:%S")
+    e.id = self.event_count
+    self.event_count += 1
+    e.title = "Event " + str(e.id)
+    events = self.cache[0]
+    events.append(e)
+    self.cache = (events, self.cache[1])
+
+    return "New event with id %s" % (e.id)
+
   # 
   # INTERNAL
   # 

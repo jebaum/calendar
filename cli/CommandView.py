@@ -62,6 +62,12 @@ class CommandView(object):
         self.response = 'ID not recognized, must be format "delete id=xxx"'
         return
       self.response = self.EventStore.delete_event(match.group(1).strip())
+    elif 'new' in self.cmd:
+      match = re.match(r'new start=(.*) end=(.*)', self.cmd, re.DOTALL)
+      if match == None:
+        self.response = 'New must be in format "new start=xxx end=xxx"'
+        return
+      self.response = self.EventStore.new_event(match.group(1).strip(), match.group(2).strip())
 
   def draw_help(self):
     rectangle(self.stdscr,self.y-4,self.x,self.y-1, self.w)
