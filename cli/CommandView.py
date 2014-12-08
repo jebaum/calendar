@@ -49,7 +49,13 @@ class CommandView(object):
         return
       self.response = self.EventStore.add_filter(match.group(1).strip(), match.group(2).strip())
     elif 'update' in self.cmd:
-      pass
+      cmd_cleaned = self.cmd[len('update '):]
+      match = re.findall(r'(.*?)=(.*?) ', cmd_cleaned, re.DOTALL)
+      if len(match) == 0 or match[0][0] != 'id':
+        self.response = 'Update must have key value pairs in format update id=xxx key=xxx'
+        return
+      self.response = self.EventStore.update_event(match[0][1], match[1:])
+      # self.response = self.EventStore.add_filter(match.group(1).strip(), match.group(2).strip())
     elif 'delete' in self.cmd:
       match = re.match(r'delete id=(.*)', self.cmd, re.DOTALL)
       if match == None:

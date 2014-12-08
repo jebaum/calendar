@@ -43,24 +43,34 @@ class EventStore():
 
     return self.filter_events(self.cache[0])
 
-  def update_event(self, e):
+  def update_event(self, id_str, kvs):
     """
-    Update e on cache and server
+    Update event with id = id_str on cache and server, changing all key/values in kvs
     """
-    pass
+    id, err = self.validate_id(id_str)
+    if err != "":
+      return err
+
+    events = self.cache[0]
+    for i in range(len(events)):
+      e = events[i]
+      if e.id != id:
+        continue
+      for k,v in kvs:
+        if getattr(e,k,"err") != "err":
+          setattr(e,k,v)
+        else:
+          return "Key '%s' unrecognized" % (k)
+    self.cache = (events, self.cache[1])
+
 
   def delete_event(self, id_str):
     """
     Delete event with id = id_str
     """
-    id = -1
-    try:
-      id = int(id_str)
-    except Exception as e:
-      return "ID '%s' not recognized as integer" % (id_str)
-
-    if id > self.event_count or id < 0 or len(filter(lambda e: e.id == id, self.cache[0])) == 0:
-      return "Event with id = '%s' does not exist" % (str(id))
+    id, err = self.validate_id(id_str)
+    if err != "":
+      return err
 
     self.cache = (filter(lambda e: e.id != id, self.cache[0]), self.cache[1])
     return "Deleted event with id = '%s'" % (str(id))
@@ -93,6 +103,19 @@ class EventStore():
       return 'Success! Filter (%s) in (%s)' % (filter_info, key)
 
     return False
+
+  def validate_id(self, id_str):
+    id = -1
+    try:
+      id = int(id_str)
+    except Exception as e:
+      return id, "ID '%s' not recognized as integer" % (id_str)
+
+    if id > self.event_count or id < 0 or len(filter(lambda e: e.id == id, self.cache[0])) != 1:
+      return id, "Event with id = '%s' does not exist" % (str(id))
+
+    return id, ""
+
 
   def get_events_from_json_file(self, filename):
     """
