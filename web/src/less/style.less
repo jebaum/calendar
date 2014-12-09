@@ -1,0 +1,136 @@
+@import "material-ui/src/less/scaffolding.less";
+@import "material-ui/src/less/components.less";
+
+.mui-app-canvas {
+  height: 100%;
+  .mui-app-bar {
+    z-index: 101;
+  }
+
+  .mui-app-content-canvas {
+    &.with-nav {
+      @subNavWidth: (@desktop-keyline-increment * 4);
+      .lh-calc(min-height, ~'100% - @{app-bar-height}');
+
+      .subContent {
+        max-width: 90%;
+        height: 100%;
+        padding: @desktop-gutter;
+      }
+    }
+  }
+}
+
+.calendar-wrapper-month {
+
+  .cell {
+    height: 100px;
+  }
+}
+
+.calendar-wrapper-week, .calendar-wrapper-day {
+
+  .cell {
+    height: 500px;
+
+    .events-wrapper {
+      margin-top: 10px;
+      position: relative;
+      height: 450px;
+
+      h4, h6 {
+        padding-top: 0px;
+        margin-bottom: 0px;
+      }
+    }
+  }
+}
+
+.event-block:hover {
+  z-index: 100 !important;
+}
+
+.calendar-wrapper-week {
+  .link {
+    display: block;
+  }
+}
+
+.calendar-wrapper-day {
+  .event-time {
+    float: right;
+  }
+}
+
+.calendar-wrapper {
+  display: table;
+
+  .calendar {
+    table-layout: fixed;
+    width: 100%;
+
+    .cell {
+      min-width: 125px;
+      border: thin solid @grey-300;
+      vertical-align: top;
+      padding: 4px;
+      position: relative;
+
+      .event-block {
+        padding: 5px;
+        opacity: 1.0;
+        background-color: @light-blue-200;
+        width: 90%;
+        position: absolute;
+        .lh-box-shadow(0 0 10px @grey-600);
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .event-block-short {
+        padding: 2px;
+
+        .link {
+          display: inline-block;
+        }
+      }
+    }
+
+    .cell-today {
+      background-color: @grey-300;
+    }
+
+    .cell-disabled {
+      color: @grey-300;
+    }
+  }
+}
+
+.mui-toolbar .mui-toolbar-group .mui-flat-button {
+  height: 100%;
+  background-color: @toolbar-background-color;
+  margin-left: 20px;
+  text-transform: none;
+  font-weight: normal;
+  color: @light-black;
+  &:hover,
+  &.mui-is-keyboard-focused {
+    background-color: @flat-button-color;
+  }
+}
+
+.link {
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.num-events {
+  float: right;
+  background-color: @grey-300;
+  border: 1px solid @grey-300;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  padding: 0px 4px;
+}
