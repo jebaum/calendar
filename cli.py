@@ -1,11 +1,11 @@
 from cli import *
+import sys
 
-nd = NcursesDisplay()
+debug = False
+if len(sys.argv) > 1 and '--debug' in sys.argv:
+  debug = True
+nd = NcursesDisplay(debug)
 nd.display()
-
-es = EventStore()
-es.get_events()
-print(es.get_events())
 
 """
 if __name__ == '__main__':

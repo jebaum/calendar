@@ -22,8 +22,8 @@ def handle_sigwinch(signum, frame):
 signal.signal(signal.SIGWINCH, handle_sigwinch)
 
 class NcursesDisplay:
-  def __init__(self):
-    pass
+  def __init__(self, debug=False):
+    self.debug = debug
 
   def setup_curses(self):
     # main window, stdscr
@@ -55,7 +55,7 @@ class NcursesDisplay:
     try:
       self.setup_curses()
 
-      es = EventStore()
+      es = EventStore(self.debug)
       self.DailyView = DailyView(es)
       self.WeeklyView = WeeklyView(es)
       self.MonthlyView = MonthlyView(es)
@@ -110,6 +110,11 @@ class NcursesDisplay:
           # Refresh to clear help box, apply any commands
           self.refresh_views()
           self.CommandView.display_response()
+
+        # Reload events from server
+        elif c == ord('r'):
+          es.reload_events()
+          self.refresh_views()
 
         # time.sleep(0.01)
 

@@ -4,9 +4,10 @@ import random
 from event import Event
 
 class EventStore():
-  def __init__(self):
+  def __init__(self, debug=False):
     # cache: tuple (events:list, last_update:datetime)
-    self.cache = None
+    self.cache = []
+    self.debug = debug
 
     self.filters = {'date': None,
                     'title': None,
@@ -16,15 +17,8 @@ class EventStore():
 
     self.event_count = 0
 
-  # 
-  # EXTERNAL
-  # 
-  def get_events(self):
-    """
-    Return events, fetching from server as needed
-    Applies any active filters
-    """
-    if self.cache is None:
+    # create dummy events
+    if self.debug:
       events = []
       for i in range(200):
         e = Event()
@@ -39,9 +33,31 @@ class EventStore():
         events.append(e)
 
       self.cache = events
-      # self.cache = (self.get_events_from_json_file("json.txt"), None)
+    else:
+      import requests
+
+  # 
+  # EXTERNAL
+  # 
+  def get_events(self):
+    """
+    Return events, fetching from server as needed
+    Applies any active filters
+    """
+    # Reload events from server
+    self.reload_events()
 
     return self.filter_events(self.cache)
+
+  def reload_events(self):
+    # Make get request from sever
+    if self.debug:
+      return
+
+  def update_server(self):
+    # Send patch with everything as json
+    if self.debug:
+      return
 
   def update_event(self, id_str, kvs):
     """
@@ -62,6 +78,7 @@ class EventStore():
         else:
           return "Key '%s' unrecognized" % (k)
     self.cache = events
+    self.update_server()
 
   def delete_event(self, id_str):
     """
@@ -72,6 +89,8 @@ class EventStore():
       return err
 
     self.cache = filter(lambda e: e.id != id, self.cache)
+    self.update_server()
+
     return "Deleted event with id = '%s'" % (str(id))
 
   def new_event(self, start, end):
@@ -95,6 +114,9 @@ class EventStore():
     e.title = "Event " + str(e.id)
 
     self.cache.append(e)
+
+    # Update server with changes
+    self.update_server()
 
     return "New event with id %s" % (e.id)
 
