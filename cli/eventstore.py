@@ -1,7 +1,7 @@
 import json, datetime
 import random
 
-from event import Event
+from Event import Event
 
 class EventStore():
   def __init__(self, debug=False):

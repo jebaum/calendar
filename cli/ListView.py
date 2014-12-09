@@ -1,6 +1,6 @@
 import curses
 from ScrollableView import *
-from event import Event
+from Event import Event
 
 class ListView(ScrollableView):
   def __init__(self):

@@ -4,8 +4,8 @@ import sys
 debug = False
 if len(sys.argv) > 1 and '--debug' in sys.argv:
   debug = True
-nd = NcursesDisplay(debug)
-nd.display()
+cd = CursesDisplay(debug)
+cd.display()
 
 """
 if __name__ == '__main__':

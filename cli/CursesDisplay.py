@@ -9,10 +9,9 @@ from ListView import *
 from DailyView import *
 from WeeklyView import *
 from MonthlyView import *
-from SummaryView import *
 from CommandView import *
-from event import *
-from eventstore import *
+from Event import *
+from EventStore import *
 
 global resize_flag
 def handle_sigwinch(signum, frame):
@@ -21,7 +20,7 @@ def handle_sigwinch(signum, frame):
 
 signal.signal(signal.SIGWINCH, handle_sigwinch)
 
-class NcursesDisplay:
+class CursesDisplay:
   def __init__(self, debug=False):
     self.debug = debug
 
