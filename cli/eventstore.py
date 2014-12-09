@@ -54,10 +54,25 @@ class EventStore():
     if self.debug:
       return
 
+    url = 'http://localhost:4567/date_start/%s/date_end/%s' % (0, endTime)
+    r = requests.get(url)
+    events = []
+    for event in r.json():
+       e = Event()
+       e.load_from_json(event)
+       events.append(e)
+    self.cache = events
+
   def update_server(self):
     # Send patch with everything as json
     if self.debug:
       return
+
+    payload = [str(e) for e in self.cache]
+    url = 'http://localhost:4567'
+    r = requests.post(url, data=json.dumps(payload))
+
+    self.reload_events()
 
   def update_event(self, id_str, kvs):
     """
