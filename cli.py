@@ -1,5 +1,4 @@
-from cli import *
-import sys
+from src.cli import *
 
 debug = False
 if len(sys.argv) > 1 and '--debug' in sys.argv:
