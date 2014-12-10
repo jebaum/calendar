@@ -1,10 +1,6 @@
 package yamlcal.type;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.annotation.JsonCreator;
-
-import java.util.Date;
 
 import yamlcal.type.Title;
 import yamlcal.type.Location;
@@ -29,23 +25,12 @@ public class Event {
     public final EndTime endTime;
 
     public Event(Title title, Location location, Description description, Category category, StartTime startTime, EndTime endTime) {
-        this.title        = new Title(title.valueOf());
-        this.location     = new Location(location.valueOf());
-        this.description  = new Description(description.valueOf());
-        this.category     = new Category(category.valueOf());
-        this.startTime    = new StartTime(startTime.getMilliseconds());
-        this.endTime      = new EndTime(endTime.getMilliseconds());
-    }
-
-    @JsonCreator
-    public Event(@JsonProperty("title") String title, @JsonProperty("location") String location, @JsonProperty("description") String description, @JsonProperty("category") String category, @JsonProperty("startTime") long startTime, @JsonProperty("endTime") long endTime) {
-        // TODO: I don't like having duplicate constructors like this, or exposing a constructor that uses raw datatypes.
-        this.title       = new Title(title);
-        this.location    = new Location(location);
-        this.description = new Description(description);
-        this.category    = new Category(category);
-        this.startTime   = new StartTime(startTime);
-        this.endTime     = new EndTime(endTime);
+        this.title       = new Title(title.valueOf());
+        this.location    = new Location(location.valueOf());
+        this.description = new Description(description.valueOf());
+        this.category    = new Category(category.valueOf());
+        this.startTime   = new StartTime(startTime == null ? null : startTime.valueOf());
+        this.endTime     = new EndTime(endTime == null ? null : endTime.valueOf());
     }
 
     @Override public String toString() {

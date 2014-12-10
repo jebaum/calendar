@@ -1,6 +1,5 @@
 *.class
 lib
-build
 .classpath
 .metadata
 .project
@@ -8,3 +7,7 @@ build
 venv
 __pycache__
 *.pyc
+node_modules
+.DS_Store
+bower_components
+.sass-cache
