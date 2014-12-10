@@ -1,10 +1,12 @@
 var autoprefix = require('gulp-autoprefixer');
 var browserify = require('browserify');
+var buffer = require('vinyl-buffer');
 var del = require('del');
 var gulp = require('gulp');
 var less = require('gulp-less');
 var reactify = require('reactify');
 var source = require('vinyl-source-stream');
+var uglify = require('gulp-uglify');
 
 var paths = {
   app_jsx: ['./src/js/app.jsx'],
@@ -21,6 +23,8 @@ gulp.task('js', function() {
     .transform(reactify)
     .bundle()
     .pipe(source('bundle.js'))
+    .pipe(buffer())
+    .pipe(uglify())
     .pipe(gulp.dest('./build/'));
 });
 
@@ -37,9 +41,4 @@ gulp.task('css', function() {
     .pipe(gulp.dest('./build/'));
 });
 
-gulp.task('fonts', function() {
-  return gulp.src('./bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*.*')
-    .pipe(gulp.dest('./build/fonts/'));
-});
-
-gulp.task('default', ['clean', 'watch', 'js', 'css', 'fonts']);
+gulp.task('default', ['clean', 'watch', 'js', 'css']);
