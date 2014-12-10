@@ -28,8 +28,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 
 public class MainActivity extends ActionBarActivity
@@ -45,7 +45,7 @@ public class MainActivity extends ActionBarActivity
 	private ProgressDialog _fetchProgressDialog;
 	private ProgressDialog _postProgressDialog;
 	private CalendarDatabaseHelper _calendarDatabaseHelper;
-	private PostEventTask _postEventTask;
+	private PostEventsTask _postEventsTask;
 	private FragmentManager _fragmentManager;
 	private boolean _isOffline;
 
@@ -113,7 +113,7 @@ public class MainActivity extends ActionBarActivity
 	{
 		boolean ret = super.onCreateOptionsMenu(menu);
 		getMenuInflater().inflate(R.menu.main, menu);
-		menu.getItem(R.id.month_view);
+		menu.findItem(R.id.month_view).setChecked(true);
 		return ret;
 	}
 
@@ -178,8 +178,10 @@ public class MainActivity extends ActionBarActivity
 
 				if (!_isOffline)
 				{
-					_postEventTask = new PostEventTask(event);
-					_postEventTask.execute();
+					ArrayList<Event> events = _calendarDatabaseHelper.getEvents();
+					events.add(event);
+					_postEventsTask = new PostEventsTask(events);
+					_postEventsTask.execute();
 					showPostProgressDialog();
 				}
 				else
@@ -223,9 +225,9 @@ public class MainActivity extends ActionBarActivity
 						@Override
 						public void onCancel(DialogInterface dialog)
 						{
-							if (_postEventTask != null)
+							if (_postEventsTask != null)
 							{
-								_postEventTask.cancel(true);
+								_postEventsTask.cancel(true);
 							}
 						}
 					}
@@ -326,14 +328,15 @@ public class MainActivity extends ActionBarActivity
 		builder.show();
 	}
 
-	private class PostEventTask extends AsyncTask<Void,Void,Void>
+	private class PostEventsTask extends AsyncTask<Void,Void,Void>
 	{
 		private boolean _failed = false;
-		private Event _event;
+		private ArrayList<Event> _events;
 
-		public PostEventTask(Event event)
+		public PostEventsTask(ArrayList<Event> events)
 		{
-			_event = event;
+			_events = new ArrayList<>();
+			_events.addAll(events);
 		}
 
 		@Override
@@ -362,17 +365,20 @@ public class MainActivity extends ActionBarActivity
 				JsonGenerator g = jsonFactory.createGenerator(out);
 
 				g.writeStartArray();
-				g.writeStartObject();
-				g.writeStringField(CalendarDatabaseHelper.EVENT_TITLE, _event.getTitle());
-				g.writeStringField(CalendarDatabaseHelper.EVENT_LOCATION, _event.getLocation());
-				g.writeStringField(CalendarDatabaseHelper.EVENT_DESCRIPTION,
-						_event.getDescription());
-				g.writeStringField(CalendarDatabaseHelper.EVENT_CATEGORY, _event.getCategory());
-				g.writeNumberField(CalendarDatabaseHelper.EVENT_START_TIME,
-						_event.getStartTime().getTimeInMillis());
-				g.writeNumberField(CalendarDatabaseHelper.EVENT_END_TIME,
-						_event.getEndTime().getTimeInMillis());
-				g.writeEndObject();
+				for (Event event : _events)
+				{
+					g.writeStartObject();
+					g.writeStringField(CalendarDatabaseHelper.EVENT_TITLE, event.getTitle());
+					g.writeStringField(CalendarDatabaseHelper.EVENT_LOCATION, event.getLocation());
+					g.writeStringField(CalendarDatabaseHelper.EVENT_DESCRIPTION,
+							event.getDescription());
+					g.writeStringField(CalendarDatabaseHelper.EVENT_CATEGORY, event.getCategory());
+					g.writeNumberField(CalendarDatabaseHelper.EVENT_START_TIME,
+							event.getStartTime().getTimeInMillis());
+					g.writeNumberField(CalendarDatabaseHelper.EVENT_END_TIME,
+							event.getEndTime().getTimeInMillis());
+					g.writeEndObject();
+				}
 				g.writeEndArray();
 				g.close();
 
@@ -423,7 +429,7 @@ public class MainActivity extends ActionBarActivity
 			String fieldName;
 			String fullAddress;
 
-			_calendarDatabaseHelper.deleteEvents();
+			_calendarDatabaseHelper.deleteNonCachedEvents();
 			try
 			{
 				// currently using static value for start and end dates and ip
@@ -502,6 +508,10 @@ public class MainActivity extends ActionBarActivity
 			if (_failed)
 			{
 				createNewAddressDialog();
+			}
+			else if (!_calendarDatabaseHelper.getCachedEvents().isEmpty())
+			{
+				_postEventsTask = new PostEventsTask(_calendarDatabaseHelper.getEvents());
 			}
 			printEvents();
 			((EventView) getActiveFragment()).updateEvents();

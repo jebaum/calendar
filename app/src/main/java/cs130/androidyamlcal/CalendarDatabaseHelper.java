@@ -88,8 +88,18 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 
 	public ArrayList<Event> getEvents()
 	{
+		return getEvents(null);
+	}
+
+	public ArrayList<Event> getCachedEvents()
+	{
+		return getEvents(EVENT_IS_CACHED);
+	}
+
+	public ArrayList<Event> getEvents(String where)
+	{
 		ArrayList<Event> events = new ArrayList<Event>();
-		Cursor cursor = getReadableDatabase().query(EVENT, null, null, null, null, null, null);
+		Cursor cursor = getReadableDatabase().query(EVENT, null, where, null, null, null, null);
 
 		while (cursor.moveToNext())
 		{
@@ -113,9 +123,14 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		return events;
 	}
 
+	public int deleteNonCachedEvents()
+	{
+		return getWritableDatabase().delete(EVENT, "NOT " + EVENT_IS_CACHED, null);
+	}
+
 	public int deleteEvents()
 	{
-		return getReadableDatabase().delete(EVENT, null, null);
+		return getWritableDatabase().delete(EVENT, null, null);
 	}
 
 	public int updateSession(String address)
