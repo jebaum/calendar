@@ -11,3 +11,9 @@ node_modules
 .DS_Store
 bower_components
 .sass-cache
+/android/.gradle
+/android/local.properties
+/android/.idea/workspace.xml
+/android/.idea/libraries
+/android/.DS_Store
+/android/build
