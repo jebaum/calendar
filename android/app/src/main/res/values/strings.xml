@@ -22,5 +22,6 @@
     <string name="week_view">Week View</string>
     <string name="month_view">Month View</string>
     <string name="day_view">Day View</string>
+    <string name="edit_event_title">Edit Event</string>
 
 </resources>

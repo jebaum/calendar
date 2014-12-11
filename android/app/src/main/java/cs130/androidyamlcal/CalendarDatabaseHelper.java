@@ -20,6 +20,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	private static final int VERSION = 1;
 	private static final String TAG = "CalendarDatabaseHelper";
 	private static final String EVENT = "Event";
+	private static final String EVENT_ID = "id";
 	public static final String EVENT_TITLE = "title";
 	public static final String EVENT_LOCATION = "location";
 	public static final String EVENT_DESCRIPTION = "description";
@@ -28,9 +29,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	public static final String EVENT_END_TIME = "end_time";
 	public static final String EVENT_IS_CACHED = "is_cached";
 	private static final String SESSION = "Session";
-	private static final String SESSION_OFFLINE = "offline";
 	private static final String SESSION_ADDRESS = "address";
-	private static final String SESSION_ID = "id";
 
 	public CalendarDatabaseHelper(Context context)
 	{
@@ -46,20 +45,14 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 					SESSION_ADDRESS +"))"
 		);
 		db.execSQL("CREATE TABLE " + EVENT + "(" +
+				EVENT_ID + " INTEGER PRIMARY KEY, " +
 				EVENT_TITLE + " VARCHAR(50), " +
 				EVENT_LOCATION + " VARCHAR(200), " +
 				EVENT_DESCRIPTION + " VARCHAR(500), " +
 				EVENT_CATEGORY + " VARCHAR(50), " +
 				EVENT_START_TIME + " INTEGER, " +
 				EVENT_END_TIME + " INTEGER, " +
-				EVENT_IS_CACHED + " BOOLEAN, PRIMARY KEY(" +
-					EVENT_TITLE + "," +
-					EVENT_LOCATION + "," +
-					EVENT_DESCRIPTION + "," +
-					EVENT_CATEGORY + "," +
-					EVENT_START_TIME + "," +
-					EVENT_END_TIME + "," +
-					EVENT_IS_CACHED + "))"
+				EVENT_IS_CACHED + " BOOLEAN)"
 		);
 		ContentValues cv = new ContentValues();
 		cv.put(SESSION_ADDRESS, "");
@@ -86,6 +79,21 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		db.insert(EVENT, null, cv);
 	}
 
+	public void updateEvent(Event event)
+	{
+		SQLiteDatabase db = getWritableDatabase();
+		ContentValues cv = new ContentValues();
+		cv.put(EVENT_ID, event.getId());
+		cv.put(EVENT_TITLE, event.getTitle());
+		cv.put(EVENT_LOCATION, event.getLocation());
+		cv.put(EVENT_DESCRIPTION, event.getDescription());
+		cv.put(EVENT_CATEGORY, event.getCategory());
+		cv.put(EVENT_START_TIME, event.getStartTime().getTimeInMillis());
+		cv.put(EVENT_END_TIME, event.getEndTime().getTimeInMillis());
+		cv.put(EVENT_IS_CACHED, event.isCached());
+		db.update(EVENT, cv, EVENT_ID + "=" + event.getId(), null);
+	}
+
 	public ArrayList<Event> getEvents()
 	{
 		return getEvents(null);
@@ -104,6 +112,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		while (cursor.moveToNext())
 		{
 			Event event = new Event();
+			event.setId(cursor.getInt(cursor.getColumnIndex(EVENT_ID)));
 			event.setTitle(cursor.getString(cursor.getColumnIndex(EVENT_TITLE)));
 			event.setLocation(cursor.getString(cursor.getColumnIndex(EVENT_LOCATION)));
 			event.setDescription(cursor.getString(cursor.getColumnIndex(EVENT_DESCRIPTION)));

@@ -48,6 +48,7 @@ public class MainActivity extends ActionBarActivity
 	private PostEventsTask _postEventsTask;
 	private FragmentManager _fragmentManager;
 	private boolean _isOffline;
+	private Menu _menu;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -112,6 +113,7 @@ public class MainActivity extends ActionBarActivity
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		boolean ret = super.onCreateOptionsMenu(menu);
+		_menu = menu;
 		getMenuInflater().inflate(R.menu.main, menu);
 		menu.findItem(R.id.month_view).setChecked(true);
 		menu.findItem(R.id.offline).setChecked(_isOffline);
@@ -132,8 +134,15 @@ public class MainActivity extends ActionBarActivity
 				return true;
 			case R.id.offline:
 				Log.d(TAG, "toggle offline");
-				_isOffline = !_isOffline;
-				item.setChecked(_isOffline);
+				if (_isOffline && _calendarDatabaseHelper.getSession().getAddress().isEmpty())
+				{
+					createNewAddressDialog();
+				}
+				else
+				{
+					_isOffline = !_isOffline;
+					item.setChecked(_isOffline);
+				}
 				return true;
 			case R.id.day_view:
 				Log.d(TAG, "day view selected");
@@ -172,36 +181,43 @@ public class MainActivity extends ActionBarActivity
 			{
 				Event event = new Event();
 
-				event.setTitle(data.getStringExtra(CalendarDatabaseHelper.EVENT_TITLE));
-				event.setLocation(data.getStringExtra(CalendarDatabaseHelper.EVENT_LOCATION));
-				event.setDescription(data.getStringExtra(CalendarDatabaseHelper.EVENT_DESCRIPTION));
-				event.setCategory(data.getStringExtra(CalendarDatabaseHelper.EVENT_CATEGORY));
+				event.setId(data.getIntExtra(AddEventActivity.ID, -1));
+				event.setTitle(data.getStringExtra(AddEventActivity.TITLE));
+				event.setLocation(data.getStringExtra(AddEventActivity.LOCATION));
+				event.setDescription(data.getStringExtra(AddEventActivity.DESCRIPTION));
+				event.setCategory(data.getStringExtra(AddEventActivity.CATEGORY));
 
 				Calendar startTime = Calendar.getInstance();
-				startTime.setTimeInMillis(data.getLongExtra(CalendarDatabaseHelper.EVENT_START_TIME, 0));
+				startTime.setTimeInMillis(data.getLongExtra(AddEventActivity.START_TIME, 0));
 				event.setStartTime(startTime);
 
 				Calendar endTime = Calendar.getInstance();
-				endTime.setTimeInMillis(data.getLongExtra(CalendarDatabaseHelper.EVENT_END_TIME, 0));
+				endTime.setTimeInMillis(data.getLongExtra(AddEventActivity.END_TIME, 0));
 				event.setEndTime(endTime);
 
-				event.setCached(_isOffline);
+				event.setCached(true);
 
 				DateFormat df = DateFormat.getDateTimeInstance();
 				Log.d(TAG, "new event start time: " + df.format(event.getStartTime().getTime()));
 				Log.d(TAG, "new event end time: " + df.format(event.getEndTime().getTime()));
 
-				if (!_isOffline)
+				if (event.getId() == -1)
 				{
-					ArrayList<Event> events = _calendarDatabaseHelper.getEvents();
-					events.add(event);
-					_postEventsTask = new PostEventsTask(events);
-					_postEventsTask.execute();
-					showPostProgressDialog();
+					_calendarDatabaseHelper.addEvent(event);
 				}
 				else
 				{
-					_calendarDatabaseHelper.addEvent(event);
+					_calendarDatabaseHelper.updateEvent(event);
+				}
+
+				if (!_isOffline)
+				{
+					_fetchEventsTask = new FetchEventsTask();
+					_fetchEventsTask.execute();
+					showFetchProgressDialog();
+				}
+				else
+				{
 					((EventView) getActiveFragment()).updateEvents();
 				}
 			}
@@ -210,6 +226,15 @@ public class MainActivity extends ActionBarActivity
 				Log.d(TAG, "result_canceled");
 				//Write your code if there's no result
 			}
+		}
+	}
+
+	private void setOffline(boolean isOffline)
+	{
+		_isOffline = isOffline;
+		if (_menu != null)
+		{
+			_menu.findItem(R.id.offline).setChecked(isOffline);
 		}
 	}
 
@@ -323,7 +348,7 @@ public class MainActivity extends ActionBarActivity
 					{
 						EditText addressEditText = (EditText) _newAddressDialogView.findViewById(R.id.address);
 						updateSession(addressEditText.getText().toString());
-						_isOffline = false;
+						setOffline(false);
 						_fetchEventsTask = new FetchEventsTask();
 						_fetchEventsTask.execute();
 						showFetchProgressDialog();
@@ -334,7 +359,7 @@ public class MainActivity extends ActionBarActivity
 				{
 					public void onClick(DialogInterface dialog, int id)
 					{
-						_isOffline = true;
+						setOffline(true);
 						Log.d(TAG, "offline");
 					}
 				})
@@ -424,12 +449,14 @@ public class MainActivity extends ActionBarActivity
 			{
 				createNewAddressDialog();
 			}
-//			_calendarDatabaseHelper.addEvent(_event);
-//			printEvents();
-//			((EventView) getActiveFragment()).updateEvents();
-			_postProgressDialog.cancel();
-			_fetchEventsTask = new FetchEventsTask();
-			_fetchEventsTask.execute();
+			else
+			{
+				for (Event event : _events)
+				{
+					event.setCached(false);
+					_calendarDatabaseHelper.updateEvent(event);
+				}
+			}
 		}
 	}
 
@@ -505,6 +532,7 @@ public class MainActivity extends ActionBarActivity
 										", start_date: " + event.getStartTime().toString() +
 										", end_date: " + event.getEndTime().toString()
 						);
+						event.setCached(false);
 						_calendarDatabaseHelper.addEvent(event);
 					}
 				}
