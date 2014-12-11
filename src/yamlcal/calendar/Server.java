@@ -1,29 +1,34 @@
 package yamlcal.calendar;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static spark.Spark.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException; // thrown by ObjectMapper.writeValueAsString()
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import yamlcal.type.Event;
-import yamlcal.type.Title;
-import yamlcal.type.Location;
-import yamlcal.type.Description;
 import yamlcal.type.Category;
-import yamlcal.type.StartTime;
+import yamlcal.type.Description;
 import yamlcal.type.EndTime;
+import yamlcal.type.Event;
+import yamlcal.type.Location;
+import yamlcal.type.StartTime;
+import yamlcal.type.Title;
 // import yamlcal.type.DueDate;
 
 import org.yaml.snakeyaml.Yaml;
