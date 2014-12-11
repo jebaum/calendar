@@ -142,45 +142,120 @@ public class Server {
         // GET api for getting calendar data based on a date range
         get("/date_start/:start/date_end/:end", (request, response) -> {
             String getResponse;
+
+            // attempt to get the range
             long rangeStart, rangeEnd;
             try {
                 rangeStart = Long.parseLong(request.params(":start"), 10);
                 rangeEnd   = Long.parseLong(request.params(":end"), 10);
-                System.out.println("start: " + rangeStart + ", end: " + rangeEnd);
+                System.err.println("start: " + rangeStart + ", end: " + rangeEnd);
             } catch (NumberFormatException e) {
                 rangeStart = -1;
                 rangeEnd   = -1;
-                System.out.println("Passed time parameters were bad");
+                System.err.println("Passed time parameters were bad");
                 e.printStackTrace();
             }
 
+            // go through the calendar list and add events to the response object if they're in the range
+            List<Event> responseList = new ArrayList<Event>();
             for (Event e : calendarList) {
                 if (e.getStartTime().valueOf() != null) {
                     long msTimestamp = e.getStartTime().valueOf().getTime();
                     msTimestamp /= 1000;
                     if (msTimestamp >= rangeStart && msTimestamp <= rangeEnd) {
-                        // TODO: need to build up json output
-                        System.out.println(e.getTitle());
+                        System.err.println(e.getTitle());
+                        responseList.add(e);
                     }
                 }
             }
 
+            // attempt to create and send the response
             try {
-                getResponse = mapper.writeValueAsString(calendarList);
+                getResponse = mapper.writeValueAsString(responseList);
                 response.status(201);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
                 response.status(500);
-                getResponse = "wat";
+                getResponse = "Something went wrong.";
             }
             return getResponse;
         });
 
+        // POST endpoint for updating an existing event
+        // must receive JSON of exactly two events, the first is the full contents of the event to be deleted
+        // the second is the contents of the new event
+        post("/update", (request, response) -> {
+            System.err.println("POST:\n" + request.body());
+            List<Event> eventUpdate;
+            try {
+                eventUpdate = mapper.readValue(request.body(), new TypeReference<List<Event>>() {});
+            } catch (IOException  e) {  // JsonProcessingException is also caught by IOException
+                e.printStackTrace();
+                eventUpdate = null;
+            }
+
+            String responseString;
+            if (eventUpdate.size() > 2) {
+                responseString = "Invalid POST - must contain two events";
+            } else {
+                for (Event e : calendarList) {
+                    if (eventUpdate.get(0) == e) {
+                        calendarList.remove(e);
+                    }
+                }
+                calendarList.add(eventUpdate.get(1));
+                responseString = "success";
+            }
+
+            return responseString;
+        });
+
+
+        // POST endpoint for receiving updates to the entire calendar file
+        // ASSUMPTION: the entire contents of the calendar file will be sent in every POST
+        // this simplifies the code, and the requests are very small and infrequent, so it's a good tradeoff
         post("/", (request, response) -> {
-            // TODO should events received via post be added to some "master" calendarList, e.g. the existing one?
-            // should they be immediately written to the calendar file?
-            System.out.println("POST:\n" + request.body());
-            return "Thanks for the post!\n" + request.body() + "\n";
+            System.err.println("POST:\n" + request.body());
+
+            List<Event> postList; // TODO: should I just use the calendarList from above instead?
+            try {
+                postList = mapper.readValue(request.body(), new TypeReference<List<Event>>() {});
+            } catch (IOException  e) {  // JsonProcessingException is also caught by IOException
+                e.printStackTrace();
+                postList = null;
+            }
+
+
+            // generate calendar file content
+            String calendarFile = "---\n";
+            for (Event e : postList) {
+                // TODO: problem with this code - how to handle all day events?
+                DateFormat formatter = new SimpleDateFormat("MM/dd/yy h:mm a");
+                String startTimeString = formatter.format(e.getStartTime().valueOf());
+                String endTimeString = formatter.format(e.getEndTime().valueOf());
+
+                // TODO: if something isn't defined, leave it out of the file?
+                // if for instance, somebody doesn't specify a category, i think it will be an empty string
+                calendarFile += "\n";
+                calendarFile +=  e.getTitle().valueOf() + ":\n";
+                calendarFile += "  - location: "    + e.getLocation().valueOf() + "\n";
+                calendarFile += "  - description: " + e.getDescription().valueOf() + "\n";
+                calendarFile += "  - category: "    + e.getCategory().valueOf() + "\n";
+                calendarFile += "  - start: "       + startTimeString + "\n";
+                calendarFile += "  - end: "         + endTimeString + "\n";
+            }
+
+            File file = new File("calendar.yaml");
+            try {
+                FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write(calendarFile);
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return "Thanks for the post!\n" + request.body() + "\n\n";
         });
 
     }
