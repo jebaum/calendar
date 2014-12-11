@@ -118,6 +118,28 @@ public class Server {
          * BEGIN ENDPOINTS
          */
 
+        // GET / should return the web ui's index.html, but I've abandoned hope on that for now
+        get ("/", (request, response) -> {
+            response.redirect(":4568");
+            return response;
+        });
+
+        // GET all of the calendar events in the calendar file
+        get("/all", (request, response) -> {
+            String getResponse;
+            try {
+                getResponse = mapper.writeValueAsString(calendarList);
+                response.status(201);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                response.status(500);
+                getResponse = "Something went wrong.";
+            }
+
+            return getResponse;
+        });
+
+        // GET api for getting calendar data based on a date range
         get("/date_start/:start/date_end/:end", (request, response) -> {
             String getResponse;
             long rangeStart, rangeEnd;
