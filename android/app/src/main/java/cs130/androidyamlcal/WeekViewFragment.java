@@ -1,11 +1,14 @@
 package cs130.androidyamlcal;
 
+import android.content.Intent;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
@@ -17,7 +20,8 @@ import java.util.List;
 /**
 * Created by kevin on 12/3/14.
 */
-public class WeekViewFragment extends Fragment implements WeekView.MonthChangeListener, EventView
+public class WeekViewFragment extends Fragment
+		implements WeekView.MonthChangeListener, EventView, WeekView.EventClickListener
 {
 	public static final String NUM_DAYS = "numDays";
 	private static final String TAG = "WeekViewFragment";
@@ -40,6 +44,7 @@ public class WeekViewFragment extends Fragment implements WeekView.MonthChangeLi
 		View v = inflater.inflate(R.layout.fragment_week_view, container, false);
 		_weekView = (WeekView) v.findViewById(R.id.week_view);
 		_weekView.setMonthChangeListener(this);
+		_weekView.setOnEventClickListener(this);
 		_weekView.setNumberOfVisibleDays(_numVisibleDays);
 		return v;
 	}
@@ -49,17 +54,6 @@ public class WeekViewFragment extends Fragment implements WeekView.MonthChangeLi
 	{
 		List<WeekViewEvent> events = new ArrayList<>();
 		Log.d(TAG, "year: " + year + ", month: " + month);
-//		Calendar startTime = Calendar.getInstance();
-//		startTime.set(Calendar.HOUR_OF_DAY, 3);
-//		startTime.set(Calendar.MINUTE, 0);
-//		startTime.set(Calendar.MONTH, month-1);
-//		startTime.set(Calendar.YEAR, year);
-//		Calendar endTime = (Calendar) startTime.clone();
-//		endTime.add(Calendar.HOUR, 1);
-//		endTime.set(Calendar.MONTH, month-1);
-//		WeekViewEvent testEvent = new WeekViewEvent(1, "Test event", startTime, endTime);
-//		testEvent.setColor(getResources().getColor(R.color.event_color_01));
-//		events.add(testEvent);
 
 		for (Event event : _calendarDatabaseHelper.getEvents())
 		{
@@ -70,7 +64,8 @@ public class WeekViewFragment extends Fragment implements WeekView.MonthChangeLi
 			{
 				Log.d(TAG, event.getTitle() + ": " + String.valueOf(event.getStartTime().get
 						(Calendar.MONTH)));
-				WeekViewEvent weekViewEvent = new WeekViewEvent(1, event.getTitle(), event.getStartTime(), event.getEndTime());
+				WeekViewEvent weekViewEvent = new WeekViewEvent(event.getId(),
+						event.getTitle(), event.getStartTime(), event.getEndTime());
 				weekViewEvent.setColor(getResources().getColor(R.color.event_color_02));
 				events.add(weekViewEvent);
 			}
@@ -79,13 +74,24 @@ public class WeekViewFragment extends Fragment implements WeekView.MonthChangeLi
 	}
 
 	@Override
+	public void onEventClick(WeekViewEvent selectedEvent, RectF eventRect)
+	{
+		Intent i = new Intent(getActivity(), AddEventActivity.class);
+		Event event = _calendarDatabaseHelper.getEvent((int) selectedEvent.getId());
+		i.putExtra(AddEventActivity.ID, event.getId());
+		i.putExtra(AddEventActivity.TITLE, event.getTitle());
+		i.putExtra(AddEventActivity.LOCATION, event.getLocation());
+		i.putExtra(AddEventActivity.DESCRIPTION, event.getDescription());
+		i.putExtra(AddEventActivity.CATEGORY, event.getCategory());
+		i.putExtra(AddEventActivity.START_TIME, event.getStartTime().getTimeInMillis());
+		i.putExtra(AddEventActivity.END_TIME, event.getEndTime().getTimeInMillis());
+		getActivity().startActivityForResult(i, 1);
+		Toast.makeText(getActivity(), "Clicked " + selectedEvent.getName(), Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
 	public void updateEvents()
 	{
 		_weekView.goToToday();
-	}
-
-	public void setNumberOfVisibleDays(int numDays)
-	{
-		_weekView.setNumberOfVisibleDays(numDays);
 	}
 }

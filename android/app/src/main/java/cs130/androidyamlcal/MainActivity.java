@@ -54,7 +54,7 @@ public class MainActivity extends ActionBarActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
+		Log.d(TAG, "onCreate");
 		_isOffline = false;
 		setContentView(R.layout.activity_fragment);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -175,6 +175,7 @@ public class MainActivity extends ActionBarActivity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
+		Log.d(TAG, "onActivityResult");
 		if (requestCode == 1)
 		{
 			if(resultCode == RESULT_OK)

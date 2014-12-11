@@ -94,6 +94,14 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		db.update(EVENT, cv, EVENT_ID + "=" + event.getId(), null);
 	}
 
+	public Event getEvent(int id)
+	{
+		Cursor cursor = getReadableDatabase().query(EVENT, null,
+				EVENT_ID + "=" + id, null, null, null, null);
+		cursor.moveToNext();
+		return packageEvent(cursor);
+	}
+
 	public ArrayList<Event> getEvents()
 	{
 		return getEvents(null);
@@ -111,23 +119,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 
 		while (cursor.moveToNext())
 		{
-			Event event = new Event();
-			event.setId(cursor.getInt(cursor.getColumnIndex(EVENT_ID)));
-			event.setTitle(cursor.getString(cursor.getColumnIndex(EVENT_TITLE)));
-			event.setLocation(cursor.getString(cursor.getColumnIndex(EVENT_LOCATION)));
-			event.setDescription(cursor.getString(cursor.getColumnIndex(EVENT_DESCRIPTION)));
-			event.setCategory(cursor.getString(cursor.getColumnIndex(EVENT_CATEGORY)));
-
-			Calendar startTime = Calendar.getInstance();
-			startTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(EVENT_START_TIME)));
-			event.setStartTime(startTime);
-
-			Calendar endTime = Calendar.getInstance();
-			endTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(EVENT_END_TIME)));
-			event.setEndTime(endTime);
-
-			event.setCached(cursor.getShort(cursor.getColumnIndex(EVENT_IS_CACHED)) == 1);
-			events.add(event);
+			events.add(packageEvent(cursor));
 		}
 		return events;
 	}
@@ -156,5 +148,26 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		cursor.moveToNext();
 		session.setAddress(cursor.getString(cursor.getColumnIndex(SESSION_ADDRESS)));
 		return session;
+	}
+
+	private Event packageEvent(Cursor cursor)
+	{
+		Event event = new Event();
+		event.setId(cursor.getInt(cursor.getColumnIndex(EVENT_ID)));
+		event.setTitle(cursor.getString(cursor.getColumnIndex(EVENT_TITLE)));
+		event.setLocation(cursor.getString(cursor.getColumnIndex(EVENT_LOCATION)));
+		event.setDescription(cursor.getString(cursor.getColumnIndex(EVENT_DESCRIPTION)));
+		event.setCategory(cursor.getString(cursor.getColumnIndex(EVENT_CATEGORY)));
+
+		Calendar startTime = Calendar.getInstance();
+		startTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(EVENT_START_TIME)));
+		event.setStartTime(startTime);
+
+		Calendar endTime = Calendar.getInstance();
+		endTime.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(EVENT_END_TIME)));
+		event.setEndTime(endTime);
+
+		event.setCached(cursor.getShort(cursor.getColumnIndex(EVENT_IS_CACHED)) == 1);
+		return event;
 	}
 }

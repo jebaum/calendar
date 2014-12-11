@@ -106,8 +106,8 @@ public class AddEventActivity extends ActionBarActivity
 				i.putExtra(CATEGORY, _categoryEditText.getText().toString());
 				i.putExtra(START_TIME, start.getTimeInMillis());
 				i.putExtra(END_TIME, end.getTimeInMillis());
-				setResult(RESULT_OK, i);
 				finish();
+				setResult(RESULT_OK, i);
 			}
 		});
 	}
