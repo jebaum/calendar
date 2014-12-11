@@ -1,6 +1,7 @@
 package cs130.androidyamlcal;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
 import android.widget.ListView;
@@ -45,6 +47,23 @@ public class MonthViewFragment extends Fragment implements EventView
 		ListView eventsList = (ListView) v.findViewById(R.id.events_list);
 		_eventAdapter = new EventAdapter(getActivity(), _dayEvents);
 		eventsList.setAdapter(_eventAdapter);
+		eventsList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		{
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+			{
+				Intent i = new Intent(getActivity(), AddEventActivity.class);
+				Event event = _dayEvents.get(position);
+				i.putExtra(AddEventActivity.ID, event.getId());
+				i.putExtra(AddEventActivity.TITLE, event.getTitle());
+				i.putExtra(AddEventActivity.LOCATION, event.getLocation());
+				i.putExtra(AddEventActivity.DESCRIPTION, event.getDescription());
+				i.putExtra(AddEventActivity.CATEGORY, event.getCategory());
+				i.putExtra(AddEventActivity.START_TIME, event.getStartTime().getTimeInMillis());
+				i.putExtra(AddEventActivity.END_TIME, event.getEndTime().getTimeInMillis());
+				getActivity().startActivityForResult(i, 1);
+			}
+		});
 
 		_calendarView = (CalendarView) v.findViewById(R.id.calendar);
 		_calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener()
@@ -55,6 +74,8 @@ public class MonthViewFragment extends Fragment implements EventView
 				updateEvents(year, month, dayOfMonth);
 			}
 		});
+
+		updateEvents();
 		return v;
 	}
 
