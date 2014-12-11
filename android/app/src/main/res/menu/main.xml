@@ -6,12 +6,14 @@
     <item
         android:id="@+id/add_event"
         android:title="@string/add_event"
-        app:showAsAction="never"/>
+        android:icon="@android:drawable/ic_menu_add"
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/offline"
         android:title="@string/offline"
         android:checkable="true"
+        android:icon="@android:drawable/presence_offline"
         app:showAsAction="never"/>
 
     <group
@@ -20,16 +22,19 @@
         <item
             android:id="@+id/day_view"
             android:title="@string/day_view"
+            android:icon="@android:drawable/ic_menu_day"
             app:showAsAction="never"/>
 
         <item
             android:id="@+id/week_view"
             android:title="@string/week_view"
+            android:icon="@android:drawable/ic_menu_week"
             app:showAsAction="never"/>
 
         <item
             android:id="@+id/month_view"
             android:title="@string/month_view"
+            android:icon="@android:drawable/ic_menu_month"
             app:showAsAction="never"/>
 
     </group>

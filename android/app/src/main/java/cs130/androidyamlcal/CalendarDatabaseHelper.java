@@ -25,9 +25,9 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	public static final String EVENT_LOCATION = "location";
 	public static final String EVENT_DESCRIPTION = "description";
 	public static final String EVENT_CATEGORY = "category";
-	public static final String EVENT_START_TIME = "start_time";
-	public static final String EVENT_END_TIME = "end_time";
-	public static final String EVENT_IS_CACHED = "is_cached";
+	public static final String EVENT_START_TIME = "startTime";
+	public static final String EVENT_END_TIME = "endTime";
+	public static final String EVENT_IS_CACHED = "isCached";
 	private static final String SESSION = "Session";
 	private static final String SESSION_ADDRESS = "address";
 
@@ -122,6 +122,11 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 			events.add(packageEvent(cursor));
 		}
 		return events;
+	}
+
+	public int deleteEvent(Event event)
+	{
+		return getWritableDatabase().delete(EVENT, EVENT_ID + "=" + event.getId(), null);
 	}
 
 	public int deleteNonCachedEvents()

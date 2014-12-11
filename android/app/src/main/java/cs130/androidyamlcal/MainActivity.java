@@ -134,14 +134,23 @@ public class MainActivity extends ActionBarActivity
 				return true;
 			case R.id.offline:
 				Log.d(TAG, "toggle offline");
-				if (_isOffline && _calendarDatabaseHelper.getSession().getAddress().isEmpty())
+				if (_isOffline)
 				{
-					createNewAddressDialog();
+					if (_calendarDatabaseHelper.getSession().getAddress().isEmpty())
+					{
+						createNewAddressDialog();
+					}
+					else
+					{
+						setOffline(false);
+						_fetchEventsTask = new FetchEventsTask();
+						_fetchEventsTask.execute();
+						showFetchProgressDialog();
+					}
 				}
 				else
 				{
-					_isOffline = !_isOffline;
-					item.setChecked(_isOffline);
+					setOffline(true);
 				}
 				return true;
 			case R.id.day_view:
@@ -199,15 +208,20 @@ public class MainActivity extends ActionBarActivity
 				event.setCached(true);
 
 				DateFormat df = DateFormat.getDateTimeInstance();
-				Log.d(TAG, "new event start time: " + df.format(event.getStartTime().getTime()));
-				Log.d(TAG, "new event end time: " + df.format(event.getEndTime().getTime()));
 
 				if (event.getId() == -1)
 				{
+					Log.d(TAG, "adding event");
 					_calendarDatabaseHelper.addEvent(event);
+				}
+				else if (data.getBooleanExtra(AddEventActivity.DELETE, false))
+				{
+					Log.d(TAG, "removing event");
+					_calendarDatabaseHelper.deleteEvent(event);
 				}
 				else
 				{
+					Log.d(TAG, "updating event");
 					_calendarDatabaseHelper.updateEvent(event);
 				}
 
@@ -219,7 +233,7 @@ public class MainActivity extends ActionBarActivity
 				}
 				else
 				{
-					((EventView) getActiveFragment()).updateEvents();
+					((EventView) getActiveFragment()).updateEvents(event.getStartTime());
 				}
 			}
 			if (resultCode == RESULT_CANCELED)
@@ -376,6 +390,7 @@ public class MainActivity extends ActionBarActivity
 
 		public PostEventsTask(ArrayList<Event> events)
 		{
+			Log.d(TAG, "post events task oncreate");
 			_events = new ArrayList<>();
 			_events.addAll(events);
 		}
@@ -383,6 +398,7 @@ public class MainActivity extends ActionBarActivity
 		@Override
 		protected Void doInBackground(Void... params)
 		{
+			Log.d(TAG, "sending events");
 			HttpURLConnection connection;
 			String fullAddress;
 			try
@@ -458,6 +474,7 @@ public class MainActivity extends ActionBarActivity
 					_calendarDatabaseHelper.updateEvent(event);
 				}
 			}
+			_postProgressDialog.cancel();
 		}
 	}
 
@@ -473,6 +490,9 @@ public class MainActivity extends ActionBarActivity
 			String fullAddress;
 
 			_calendarDatabaseHelper.deleteNonCachedEvents();
+
+			Log.d(TAG, "cached events");
+			printEvents();
 			try
 			{
 				// currently using static value for start and end dates and ip
@@ -484,7 +504,7 @@ public class MainActivity extends ActionBarActivity
 				{
 					fullAddress = "http://" + _session.getAddress();
 				}
-				URL url = new URL(fullAddress + ":4567/date_start/123/date_end/234");
+				URL url = new URL(fullAddress + ":4567/date_start/0/date_end/1577836800");
 				connection = (HttpURLConnection) url.openConnection();
 
 				InputStream in = connection.getInputStream();
@@ -555,10 +575,13 @@ public class MainActivity extends ActionBarActivity
 			}
 			else if (!_calendarDatabaseHelper.getCachedEvents().isEmpty())
 			{
+				Log.d(TAG, "after fetch");
+				printEvents();
 				_postEventsTask = new PostEventsTask(_calendarDatabaseHelper.getEvents());
+				_postEventsTask.execute();
+				showPostProgressDialog();
 			}
-			printEvents();
-			((EventView) getActiveFragment()).updateEvents();
+			((EventView) getActiveFragment()).updateEvents(Calendar.getInstance());
 			_fetchProgressDialog.cancel();
 		}
 	}

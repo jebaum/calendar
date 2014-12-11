@@ -86,12 +86,11 @@ public class WeekViewFragment extends Fragment
 		i.putExtra(AddEventActivity.START_TIME, event.getStartTime().getTimeInMillis());
 		i.putExtra(AddEventActivity.END_TIME, event.getEndTime().getTimeInMillis());
 		getActivity().startActivityForResult(i, 1);
-		Toast.makeText(getActivity(), "Clicked " + selectedEvent.getName(), Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
-	public void updateEvents()
+	public void updateEvents(Calendar eventTime)
 	{
-		_weekView.goToToday();
+		_weekView.goToDate(eventTime);
 	}
 }

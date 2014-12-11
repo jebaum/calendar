@@ -75,7 +75,7 @@ public class MonthViewFragment extends Fragment implements EventView
 			}
 		});
 
-		updateEvents();
+		updateEvents(null);
 		return v;
 	}
 
@@ -100,7 +100,8 @@ public class MonthViewFragment extends Fragment implements EventView
 		_eventAdapter.notifyDataSetChanged();
 	}
 
-	public void updateEvents()
+	@Override
+	public void updateEvents(Calendar eventTime)
 	{
 		Date selectedDate = new Date(_calendarView.getDate());
 		updateEvents(selectedDate.getYear() + 1900, selectedDate.getMonth(),

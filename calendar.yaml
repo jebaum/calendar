@@ -1,0 +1,43 @@
+---
+
+ahbxjx:
+  - location: 
+  - description: 
+  - category: 
+  - start: 12/25/14 3:20 AM
+  - end: 12/11/14 3:20 AM
+
+aallkxjw:
+  - location: 
+  - description: 
+  - category: 
+  - start: 12/11/14 2:30 AM
+  - end: 12/11/14 2:30 AM
+
+habjbd:
+  - location: 
+  - description: 
+  - category: 
+  - start: 12/11/14 2:25 AM
+  - end: 12/11/14 2:25 AM
+
+lecture:
+  - location: aroom
+  - description: boring
+  - category: lame
+  - start: 10/22/14 12:26 PM
+  - end: 10/22/14 1:16 PM
+
+CS130:
+  - location: Boelter 2444
+  - description: Eggert talks and we listen
+  - category: school
+  - start: 10/02/14 10:00 AM
+  - end: 10/02/14 11:50 AM
+
+Halloween:
+  - location: everywhere
+  - description: people dress up
+  - category: holiday
+  - start: 10/31/14 12:00 AM
+  - end: 10/31/14 12:00 AM

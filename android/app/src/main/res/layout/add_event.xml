@@ -50,46 +50,50 @@
                 android:layout_height="wrap_content"
                 android:text="@string/start_time"/>
 
-            <DatePicker
-                android:id="@+id/start_date_picker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:calendarViewShown="false">
-
-            </DatePicker>
-
-            <TimePicker
-                android:id="@+id/start_time_picker"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            </TimePicker>
+                <Button
+                    android:id="@+id/start_date_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_date_button"/>
+
+                <Button
+                    android:id="@+id/start_time_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_time_button"/>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/end_time"/>
 
-            <DatePicker
-                android:id="@+id/end_date_picker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:calendarViewShown="false">
-
-            </DatePicker>
-
-            <TimePicker
-                android:id="@+id/end_time_picker"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            </TimePicker>
+                <Button
+                    android:id="@+id/end_date_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_date_button"/>
 
-            <Button
-                android:id="@+id/add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add"/>
+                <Button
+                    android:id="@+id/end_time_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_time_button"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
