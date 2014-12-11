@@ -19,15 +19,18 @@ import java.util.List;
 */
 public class WeekViewFragment extends Fragment implements WeekView.MonthChangeListener, EventView
 {
+	public static final String NUM_DAYS = "numDays";
 	private static final String TAG = "WeekViewFragment";
 	private WeekView _weekView;
 	private CalendarDatabaseHelper _calendarDatabaseHelper;
+	private int _numVisibleDays;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		_calendarDatabaseHelper = new CalendarDatabaseHelper(getActivity().getApplicationContext());
+		_numVisibleDays = getArguments().getInt(NUM_DAYS, 1);
 	}
 
 	@Override
@@ -37,6 +40,7 @@ public class WeekViewFragment extends Fragment implements WeekView.MonthChangeLi
 		View v = inflater.inflate(R.layout.fragment_week_view, container, false);
 		_weekView = (WeekView) v.findViewById(R.id.week_view);
 		_weekView.setMonthChangeListener(this);
+		_weekView.setNumberOfVisibleDays(_numVisibleDays);
 		return v;
 	}
 
@@ -78,5 +82,10 @@ public class WeekViewFragment extends Fragment implements WeekView.MonthChangeLi
 	public void updateEvents()
 	{
 		_weekView.goToToday();
+	}
+
+	public void setNumberOfVisibleDays(int numDays)
+	{
+		_weekView.setNumberOfVisibleDays(numDays);
 	}
 }

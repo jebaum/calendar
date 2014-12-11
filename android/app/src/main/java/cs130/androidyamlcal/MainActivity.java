@@ -114,12 +114,14 @@ public class MainActivity extends ActionBarActivity
 		boolean ret = super.onCreateOptionsMenu(menu);
 		getMenuInflater().inflate(R.menu.main, menu);
 		menu.findItem(R.id.month_view).setChecked(true);
+		menu.findItem(R.id.offline).setChecked(_isOffline);
 		return ret;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+		Bundle args;
 		switch (item.getItemId())
 		{
 			case R.id.add_event:
@@ -133,13 +135,26 @@ public class MainActivity extends ActionBarActivity
 				_isOffline = !_isOffline;
 				item.setChecked(_isOffline);
 				return true;
-			case R.id.week_view:
-				Log.d(TAG, "week view");
+			case R.id.day_view:
+				Log.d(TAG, "day view selected");
 				item.setChecked(true);
-				swapFragment(new WeekViewFragment());
+				WeekViewFragment dayViewFragment = new WeekViewFragment();
+				args = new Bundle();
+				args.putInt(WeekViewFragment.NUM_DAYS, 1);
+				dayViewFragment.setArguments(args);
+				swapFragment(dayViewFragment);
+				return true;
+			case R.id.week_view:
+				Log.d(TAG, "week view selected");
+				item.setChecked(true);
+				WeekViewFragment weekViewFragment = new WeekViewFragment();
+				args = new Bundle();
+				args.putInt(WeekViewFragment.NUM_DAYS, 5);
+				weekViewFragment.setArguments(args);
+				swapFragment(weekViewFragment);
 				return true;
 			case R.id.month_view:
-				Log.d(TAG, "month view");
+				Log.d(TAG, "month view selected");
 				item.setChecked(true);
 				swapFragment(new MonthViewFragment());
 				return true;

@@ -18,6 +18,11 @@
         android:checkableBehavior="single">
 
         <item
+            android:id="@+id/day_view"
+            android:title="@string/day_view"
+            app:showAsAction="never"/>
+
+        <item
             android:id="@+id/week_view"
             android:title="@string/week_view"
             app:showAsAction="never"/>

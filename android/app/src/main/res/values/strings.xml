@@ -21,5 +21,6 @@
     <string name="offline">Offline</string>
     <string name="week_view">Week View</string>
     <string name="month_view">Month View</string>
+    <string name="day_view">Day View</string>
 
 </resources>
