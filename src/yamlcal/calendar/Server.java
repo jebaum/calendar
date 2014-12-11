@@ -34,13 +34,14 @@ import yamlcal.type.Title;
 import org.yaml.snakeyaml.Yaml;
 
 public class Server {
+    private static final String fileName = "calendar.yaml";
 
     // TODO: there are a handful of magic values through the current codebase
     // API endpoints, status codes, jackson annotations, etc. fix this
-    public static void main(String[] args) throws JsonProcessingException, FileNotFoundException, Exception {
-
+    private static List<Event> readCalendarFile()
+        throws JsonProcessingException, FileNotFoundException, ParseException {
         // create objects to parse calendar file
-        InputStream input = new FileInputStream(new File("calendar.yaml"));
+        InputStream input = new FileInputStream(new File(fileName));
         Yaml calReader    = new Yaml();
 
         // read in the calendar file as a java object
@@ -110,6 +111,12 @@ public class Server {
             calendarList.add(someEvent);
             System.err.println("Event: " + someEvent + " added to calendar list");
         }
+
+        return calendarList;
+    }
+    public static void main(String[] args) throws JsonProcessingException, FileNotFoundException, Exception {
+
+        List<Event> calendarList = readCalendarFile();
 
         ObjectMapper mapper = new ObjectMapper();
         System.err.println(mapper.writeValueAsString(calendarList));
