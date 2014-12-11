@@ -149,6 +149,9 @@ class EventStore():
     return events
 
   def add_filter(self, key, filter_info):
+    if key not in self.filters.keys():
+      return False
+
     if key in self.filters.keys() and (filter_info == None or 'None' in filter_info):
       self.filters[key] = None
       return 'Success! Clear filter (%s)' % (key)
@@ -158,7 +161,7 @@ class EventStore():
       self.filters[key] = date_filter
       return True
     elif key in self.filters.keys():
-      search_filter = lambda e: filter_info in getattr(e, key, None)
+      search_filter = lambda e: filter_info in str(getattr(e, key, ""))
       self.filters[key] = search_filter
       return 'Success! Filter (%s) in (%s)' % (filter_info, key)
 

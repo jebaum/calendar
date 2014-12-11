@@ -3,7 +3,7 @@ package yamlcal.type;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Description {
-    private String description;
+    private final String description;
 
     public Description(String description) {
         if (description == null) {

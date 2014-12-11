@@ -3,7 +3,7 @@ package yamlcal.type;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Category {
-    private String category;
+    private final String category;
 
     public Category(String category) {
         if (category == null) {

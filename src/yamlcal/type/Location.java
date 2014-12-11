@@ -3,7 +3,7 @@ package yamlcal.type;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Location {
-    private String location;
+    private final String location;
 
     public Location(String location) {
         if (location == null) {

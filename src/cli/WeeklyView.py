@@ -16,6 +16,8 @@ class WeeklyView(TimeView,ListView):
 
     self.box_header_width = 11
 
+    self.view_header = self.get_view_header()
+
     self.get_period_func = self.get_week_period
     self.offset_period_func = self.apply_week_offset
 
@@ -27,6 +29,7 @@ class WeeklyView(TimeView,ListView):
     self.clear_events()
     self.EventStore.add_filter('date', self.period)
     self.add_events(self.EventStore.get_events())
+    self.view_header = self.get_view_header()
     super(WeeklyView, self).update()
 
   def clear_events(self):
