@@ -34,13 +34,14 @@ import yamlcal.type.Title;
 import org.yaml.snakeyaml.Yaml;
 
 public class Server {
+    private static final String fileName = "calendar.yaml";
 
     // TODO: there are a handful of magic values through the current codebase
     // API endpoints, status codes, jackson annotations, etc. fix this
-    public static void main(String[] args) throws JsonProcessingException, FileNotFoundException, Exception {
-
+    private static List<Event> readCalendarFile()
+        throws JsonProcessingException, FileNotFoundException, ParseException {
         // create objects to parse calendar file
-        InputStream input = new FileInputStream(new File("calendar.yaml"));
+        InputStream input = new FileInputStream(new File(fileName));
         Yaml calReader    = new Yaml();
 
         // read in the calendar file as a java object
@@ -111,6 +112,20 @@ public class Server {
             System.err.println("Event: " + someEvent + " added to calendar list");
         }
 
+        return calendarList;
+    }
+    public static void main(String[] args)
+        throws JsonProcessingException {
+
+        List<Event> calendarList;
+        try {
+            calendarList = readCalendarFile();
+        } catch (JsonProcessingException | FileNotFoundException | ParseException e) {
+            System.err.println("Unable to read calendar file.");
+            calendarList = null;
+            e.printStackTrace();
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         System.err.println(mapper.writeValueAsString(calendarList));
 
@@ -127,8 +142,18 @@ public class Server {
         // GET all of the calendar events in the calendar file
         get("/all", (request, response) -> {
             String getResponse;
+
+            List<Event> responseList;
             try {
-                getResponse = mapper.writeValueAsString(calendarList);
+                responseList = readCalendarFile();
+            } catch (JsonProcessingException | FileNotFoundException | ParseException e) {
+                System.err.println("Unable to read calendar file.");
+                responseList = null;
+                e.printStackTrace();
+            }
+
+            try {
+                getResponse = mapper.writeValueAsString(responseList);
                 response.status(201);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -156,9 +181,18 @@ public class Server {
                 e.printStackTrace();
             }
 
+            List<Event> latestList;
+            try {
+                latestList = readCalendarFile();
+            } catch (JsonProcessingException | FileNotFoundException | ParseException e) {
+                System.err.println("Unable to read calendar file.");
+                latestList = null;
+                e.printStackTrace();
+            }
+
             // go through the calendar list and add events to the response object if they're in the range
             List<Event> responseList = new ArrayList<Event>();
-            for (Event e : calendarList) {
+            for (Event e : latestList) {
                 if (e.getStartTime().valueOf() != null) {
                     long msTimestamp = e.getStartTime().valueOf().getTime();
                     msTimestamp /= 1000;
@@ -198,12 +232,21 @@ public class Server {
             if (eventUpdate.size() > 2) {
                 responseString = "Invalid POST - must contain two events";
             } else {
-                for (Event e : calendarList) {
+
+                List<Event> latestList;
+                try {
+                    latestList = readCalendarFile();
+                } catch (JsonProcessingException | FileNotFoundException | ParseException e) {
+                    System.err.println("Unable to read calendar file.");
+                    latestList = null;
+                    e.printStackTrace();
+                }
+                for (Event e : latestList) {
                     if (eventUpdate.get(0) == e) {
-                        calendarList.remove(e);
+                        latestList.remove(e);
                     }
                 }
-                calendarList.add(eventUpdate.get(1));
+                latestList.add(eventUpdate.get(1));
                 responseString = "success";
             }
 
