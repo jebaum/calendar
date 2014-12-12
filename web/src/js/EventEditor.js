@@ -16,6 +16,7 @@ var EventEditor = React.createClass({
 
   _onDialogSubmit: function() {
     var name = this.refs.name.getValue();
+    var description = this.refs.description.getValue();
     var start = moment(
       this.refs.start.getValue(), 'YYYY-MM-DDTHH:mm'
     );
@@ -24,6 +25,7 @@ var EventEditor = React.createClass({
     );
     var event = this.props.event || {};
     event.name = name;
+    event.description = description;
     event.range = moment().range(start, end);
     if (event.id)
       Actions.setEvent(event);
