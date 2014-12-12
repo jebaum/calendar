@@ -90,9 +90,11 @@ public class AddEventActivity extends ActionBarActivity
 		}
 
 		_startDateButton.setText(DateFormat.getDateInstance().format(_startTime.getTime()));
-		_startTimeButton.setText(DateFormat.getTimeInstance().format(_startTime.getTime()));
+		_startTimeButton.setText(DateFormat.getTimeInstance(DateFormat.SHORT)
+				.format(_startTime.getTime()));
 		_endDateButton.setText(DateFormat.getDateInstance().format(_endTime.getTime()));
-		_endTimeButton.setText(DateFormat.getTimeInstance().format(_endTime.getTime()));
+		_endTimeButton.setText(DateFormat.getTimeInstance(DateFormat.SHORT)
+				.format(_endTime.getTime()));
 
 		_startDateButton.setOnClickListener(new View.OnClickListener()
 		{

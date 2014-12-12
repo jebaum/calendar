@@ -35,11 +35,7 @@ import java.util.Calendar;
 public class MainActivity extends ActionBarActivity
 {
 	private static final String TAG = "MainActivity";
-//	private ArrayList<Event> _dayEvents = new ArrayList<Event>();
-//	private EventAdapter _eventAdapter;
-//	private CalendarView _calendarView;
 	private View _newAddressDialogView;
-//	private View _addEventDialogView;
 	private Session _session;
 	private FetchEventsTask _fetchEventsTask;
 	private ProgressDialog _fetchProgressDialog;
@@ -127,10 +123,15 @@ public class MainActivity extends ActionBarActivity
 		switch (item.getItemId())
 		{
 			case R.id.add_event:
-				Log.d(TAG, "add event!!!!!");
-//				createAddEventDialog();
+				Log.d(TAG, "add event");
 				Intent i = new Intent(MainActivity.this, AddEventActivity.class);
 				startActivityForResult(i, 1);
+				return true;
+			case R.id.refresh:
+				Log.d(TAG, "refresh");
+				_fetchEventsTask = new FetchEventsTask();
+				_fetchEventsTask.execute();
+				showFetchProgressDialog();
 				return true;
 			case R.id.offline:
 				Log.d(TAG, "toggle offline");
@@ -218,8 +219,6 @@ public class MainActivity extends ActionBarActivity
 				{
 					Log.d(TAG, "removing event");
 					_calendarDatabaseHelper.deleteEvent(event);
-//					_calendarDatabaseHelper.deleteNonCachedEvents();
-//					((EventView) getActiveFragment()).updateEvents(null);
 				}
 				else
 				{
@@ -548,34 +547,6 @@ public class MainActivity extends ActionBarActivity
 									endTime.setTimeInMillis(jp.getLongValue());
 									event.setEndTime(endTime);
 							}
-//							if (fieldName.equals("title"))
-//							{
-//								event.setTitle(jp.getText());
-//							}
-//							else if (fieldName.equals("location"))
-//							{
-//								event.setLocation(jp.getText());
-//							}
-//							else if (fieldName.equals("description"))
-//							{
-//								event.setDescription(jp.getText());
-//							}
-//							else if (fieldName.equals("category"))
-//							{
-//								event.setCategory(jp.getText());
-//							}
-//							else if (fieldName.equals("startTime"))
-//							{
-//								Calendar startTime = Calendar.getInstance();
-//								startTime.setTimeInMillis(jp.getLongValue());
-//								event.setStartTime(startTime);
-//							}
-//							else if (fieldName.equals("endTime"))
-//							{
-//								Calendar endTime = Calendar.getInstance();
-//								endTime.setTimeInMillis(jp.getLongValue());
-//								event.setEndTime(endTime);
-//							}
 						}
 						Log.d(TAG, "added: " + event.getTitle() + ", " + event.getLocation() + ", " + event.getDescription() + ", " + event.getCategory() + ", " + event.getStartTime().getTimeInMillis() + ", " + event.getEndTime().getTimeInMillis());
 

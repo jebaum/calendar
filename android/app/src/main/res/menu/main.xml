@@ -10,6 +10,11 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/refresh"
+        android:title="@string/refresh"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/offline"
         android:title="@string/offline"
         android:checkable="true"

@@ -27,5 +27,6 @@
     <string name="start_date_button">Starting Date</string>
     <string name="save">Save</string>
     <string name="remove">Remove</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

@@ -1,25 +1,60 @@
 ---
 
-testing3:
-  - location: 
-  - description: 
-  - category: 
-  - start: 12/11/14 9:27 PM
-  - end: 12/11/14 9:27 PM
+Dentist appointment:
+  - location: Dentist Office
+  - description: Checkup appointment
+  - category: Personal
+  - start: 12/13/14 6:00 PM
+  - end: 12/13/14 6:30 PM
 
-testing:
-  - location: 
-  - description: 
-  - category: 
-  - start: 12/11/14 9:27 PM
-  - end: 12/11/14 9:27 PM
+Get Car Serviced:
+  - location: Garage
+  - description: Check engine light is on
+  - category: Personal
+  - start: 12/14/14 8:00 AM
+  - end: 12/14/14 11:30 AM
 
-lunch with bosses:
-  - location: 
+Linguistics Final:
+  - location: Bunche 3156
+  - description: final exam for linguistics 105
+  - category: School
+  - start: 12/16/14 11:30 PM
+  - end: 12/16/14 2:30 PM
+
+More studying for finals:
+  - location: Powell
+  - description: You aren't ready yet
+  - category: School
+  - start: 12/14/14 10:00 AM
+  - end: 12/14/14 10:30 PM
+
+Math lecture:
+  - location: MS 5127
+  - description: last lecture
+  - category: School
+  - start: 12/12/14 2:00 PM
+  - end: 12/12/14 3:00 PM
+
+CS 130 FINAL:
+  - location: Boelter 2444
+  - description: Final exam
+  - category: School
+  - start: 12/19/14 3:00 PM
+  - end: 12/19/14 6:00 PM
+
+Brunch:
+  - location: Resturant
   - description: 
-  - category: 
-  - start: 12/12/14 12:00 PM
-  - end: 12/12/14 1:00 PM
+  - category: Personal
+  - start: 12/13/14 10:00 AM
+  - end: 12/13/14 12:00 PM
+
+Study for Finals:
+  - location: Library
+  - description: Finals are next week, study!
+  - category: School
+  - start: 12/13/14 11:00 AM
+  - end: 12/13/14 5:00 PM
 
 lecture:
   - location: aroom
