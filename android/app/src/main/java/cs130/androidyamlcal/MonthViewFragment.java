@@ -84,7 +84,7 @@ public class MonthViewFragment extends Fragment implements EventView
 		Log.d(TAG, "selected date: year: " + String.valueOf(year) + ", month: "
 				+ String.valueOf(month) + ", dayOfMonth: " + String.valueOf(dayOfMonth));
 		_dayEvents.clear();
-		for (Event event : _calendarDatabaseHelper.getEvents())
+		for (Event event : _calendarDatabaseHelper.getNonDeletedEvents())
 		{
 			Calendar startTime = event.getStartTime();
 			Log.d(TAG, "year: " + startTime.get(Calendar.YEAR)

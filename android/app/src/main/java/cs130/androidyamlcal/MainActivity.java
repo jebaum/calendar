@@ -218,11 +218,13 @@ public class MainActivity extends ActionBarActivity
 				{
 					Log.d(TAG, "removing event");
 					_calendarDatabaseHelper.deleteEvent(event);
+//					_calendarDatabaseHelper.deleteNonCachedEvents();
+//					((EventView) getActiveFragment()).updateEvents(null);
 				}
 				else
 				{
 					Log.d(TAG, "updating event");
-					_calendarDatabaseHelper.updateEvent(event);
+					_calendarDatabaseHelper.cachedUpdateEvent(event);
 				}
 
 				if (!_isOffline)
@@ -474,6 +476,7 @@ public class MainActivity extends ActionBarActivity
 					_calendarDatabaseHelper.updateEvent(event);
 				}
 				_calendarDatabaseHelper.removeDeletedEvents();
+				((EventView) getActiveFragment()).updateEvents(Calendar.getInstance());
 			}
 			_postProgressDialog.cancel();
 		}
@@ -491,7 +494,6 @@ public class MainActivity extends ActionBarActivity
 			String fullAddress;
 
 			_calendarDatabaseHelper.deleteNonCachedEvents();
-
 			Log.d(TAG, "cached events");
 			printEvents();
 			try
@@ -512,6 +514,7 @@ public class MainActivity extends ActionBarActivity
 
 				JsonFactory jsonFactory = new JsonFactory();
 				JsonParser jp = jsonFactory.createParser(in);
+				Log.d(TAG, "received events");
 				if (jp.nextToken() == JsonToken.START_ARRAY)
 				{
 					while (jp.nextToken() == JsonToken.START_OBJECT)
@@ -574,10 +577,8 @@ public class MainActivity extends ActionBarActivity
 //								event.setEndTime(endTime);
 //							}
 						}
-						Log.d(TAG, "title: " + event.getTitle() +
-										", start_date: " + event.getStartTime().toString() +
-										", end_date: " + event.getEndTime().toString()
-						);
+						Log.d(TAG, "added: " + event.getTitle() + ", " + event.getLocation() + ", " + event.getDescription() + ", " + event.getCategory() + ", " + event.getStartTime().getTimeInMillis() + ", " + event.getEndTime().getTimeInMillis());
+
 						event.setCached(false);
 						_calendarDatabaseHelper.addEvent(event);
 					}
@@ -602,9 +603,13 @@ public class MainActivity extends ActionBarActivity
 			{
 				Log.d(TAG, "after fetch");
 				printEvents();
-				_postEventsTask = new PostEventsTask(_calendarDatabaseHelper.getEvents());
+				_postEventsTask = new PostEventsTask(_calendarDatabaseHelper.getNonDeletedEvents());
 				_postEventsTask.execute();
 				showPostProgressDialog();
+			}
+			else
+			{
+				_calendarDatabaseHelper.removeDeletedEvents();
 			}
 			((EventView) getActiveFragment()).updateEvents(Calendar.getInstance());
 			_fetchProgressDialog.cancel();

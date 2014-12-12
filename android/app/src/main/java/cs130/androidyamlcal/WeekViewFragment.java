@@ -46,6 +46,7 @@ public class WeekViewFragment extends Fragment
 		_weekView.setMonthChangeListener(this);
 		_weekView.setOnEventClickListener(this);
 		_weekView.setNumberOfVisibleDays(_numVisibleDays);
+		_weekView.setHourHeight(80);
 		return v;
 	}
 
@@ -55,7 +56,7 @@ public class WeekViewFragment extends Fragment
 		List<WeekViewEvent> events = new ArrayList<>();
 		Log.d(TAG, "year: " + year + ", month: " + month);
 
-		for (Event event : _calendarDatabaseHelper.getEvents())
+		for (Event event : _calendarDatabaseHelper.getNonDeletedEvents())
 		{
 			if ((event.getStartTime().get(Calendar.YEAR) == year
 					&& event.getStartTime().get(Calendar.MONTH) + 1 == month)
