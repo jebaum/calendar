@@ -22,25 +22,25 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/title"
+                android:id="@+id/title_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/title_hint"/>
 
             <EditText
-                android:id="@+id/location"
+                android:id="@+id/location_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/location_hint"/>
 
             <EditText
-                android:id="@+id/description"
+                android:id="@+id/description_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/description_hint"/>
 
             <EditText
-                android:id="@+id/category"
+                android:id="@+id/category_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/category_hint"/>
@@ -50,46 +50,50 @@
                 android:layout_height="wrap_content"
                 android:text="@string/start_time"/>
 
-            <DatePicker
-                android:id="@+id/start_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:calendarViewShown="false">
-
-            </DatePicker>
-
-            <TimePicker
-                android:id="@+id/start_time"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            </TimePicker>
+                <Button
+                    android:id="@+id/start_date_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_date_button"/>
+
+                <Button
+                    android:id="@+id/start_time_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_time_button"/>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/end_time"/>
 
-            <DatePicker
-                android:id="@+id/end_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:calendarViewShown="false">
-
-            </DatePicker>
-
-            <TimePicker
-                android:id="@+id/end_time"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            </TimePicker>
+                <Button
+                    android:id="@+id/end_date_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_date_button"/>
 
-            <Button
-                android:id="@+id/add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add"/>
+                <Button
+                    android:id="@+id/end_time_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/start_time_button"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 

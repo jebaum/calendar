@@ -16,6 +16,8 @@ class MonthlyView(TimeView,ListView):
 
     self.box_header_width = 11
 
+    self.view_hader = self.get_view_header()
+
     self.get_period_func = self.get_month_period
     self.offset_period_func = self.apply_month_offset
 
@@ -26,6 +28,7 @@ class MonthlyView(TimeView,ListView):
     self.clear_events()
     self.EventStore.add_filter('date', self.period)
     self.add_events(self.EventStore.get_events())
+    self.view_header = self.get_view_header()
     super(MonthlyView, self).update()
 
   def clear_events(self):

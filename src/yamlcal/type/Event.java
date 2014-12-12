@@ -1,6 +1,8 @@
 package yamlcal.type;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 import yamlcal.type.Title;
 import yamlcal.type.Location;
@@ -9,6 +11,7 @@ import yamlcal.type.Category;
 import yamlcal.type.StartTime;
 import yamlcal.type.EndTime;
 
+import java.util.Date;
 
 public class Event {
     @JsonUnwrapped
@@ -33,7 +36,27 @@ public class Event {
         this.endTime     = new EndTime(endTime == null ? null : endTime.valueOf());
     }
 
-    @Override public String toString() {
+    @JsonCreator
+    public Event(@JsonProperty("title") String title, @JsonProperty("location") String location, @JsonProperty("description") String description, @JsonProperty("category") String category, @JsonProperty("startTime") long startTime, @JsonProperty("endTime") long endTime) {
+        System.err.println("===========================================");
+        System.err.println("MAKING A THING USING THE JSONCREATOR METHOD");
+        System.err.println("===========================================");
+        System.err.println("title: " + title);
+        System.err.println("location: " + location);
+        System.err.println("description: " + description);
+        System.err.println("category: " + category);
+        System.err.println("startTime: " + startTime);
+        System.err.println("endTime: " + endTime);
+        System.err.println("===========================================");
+        this.title       = new Title(title);
+        this.location    = new Location(location);
+        this.description = new Description(description);
+        this.category    = new Category(category);
+        this.startTime   = new StartTime(new Date(startTime));
+        this.endTime     = new EndTime(new Date(endTime));
+    }
+
+        @Override public String toString() {
         StringBuilder result = new StringBuilder();
         String NEW_LINE = System.getProperty("line.separator");
 

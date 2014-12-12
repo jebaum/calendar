@@ -8,6 +8,7 @@ import java.util.Date;
  */
 public class Event
 {
+	private int _id;
 	private String _title;
 	private String _location;
 	private String _description;
@@ -84,6 +85,16 @@ public class Event
 	public void setCached(boolean isCached)
 	{
 		_isCached = isCached;
+	}
+
+	public int getId()
+	{
+		return _id;
+	}
+
+	public void setId(int id)
+	{
+		_id = id;
 	}
 
 //	title: "this is my title",

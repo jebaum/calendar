@@ -35,11 +35,7 @@ import java.util.Calendar;
 public class MainActivity extends ActionBarActivity
 {
 	private static final String TAG = "MainActivity";
-//	private ArrayList<Event> _dayEvents = new ArrayList<Event>();
-//	private EventAdapter _eventAdapter;
-//	private CalendarView _calendarView;
 	private View _newAddressDialogView;
-//	private View _addEventDialogView;
 	private Session _session;
 	private FetchEventsTask _fetchEventsTask;
 	private ProgressDialog _fetchProgressDialog;
@@ -48,12 +44,13 @@ public class MainActivity extends ActionBarActivity
 	private PostEventsTask _postEventsTask;
 	private FragmentManager _fragmentManager;
 	private boolean _isOffline;
+	private Menu _menu;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
+		Log.d(TAG, "onCreate");
 		_isOffline = false;
 		setContentView(R.layout.activity_fragment);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -112,34 +109,71 @@ public class MainActivity extends ActionBarActivity
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		boolean ret = super.onCreateOptionsMenu(menu);
+		_menu = menu;
 		getMenuInflater().inflate(R.menu.main, menu);
 		menu.findItem(R.id.month_view).setChecked(true);
+		menu.findItem(R.id.offline).setChecked(_isOffline);
 		return ret;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
+		Bundle args;
 		switch (item.getItemId())
 		{
 			case R.id.add_event:
-				Log.d(TAG, "add event!!!!!");
-//				createAddEventDialog();
+				Log.d(TAG, "add event");
 				Intent i = new Intent(MainActivity.this, AddEventActivity.class);
 				startActivityForResult(i, 1);
 				return true;
+			case R.id.refresh:
+				Log.d(TAG, "refresh");
+				_fetchEventsTask = new FetchEventsTask();
+				_fetchEventsTask.execute();
+				showFetchProgressDialog();
+				return true;
 			case R.id.offline:
 				Log.d(TAG, "toggle offline");
-				_isOffline = !_isOffline;
-				item.setChecked(_isOffline);
+				if (_isOffline)
+				{
+					if (_calendarDatabaseHelper.getSession().getAddress().isEmpty())
+					{
+						createNewAddressDialog();
+					}
+					else
+					{
+						setOffline(false);
+						_fetchEventsTask = new FetchEventsTask();
+						_fetchEventsTask.execute();
+						showFetchProgressDialog();
+					}
+				}
+				else
+				{
+					setOffline(true);
+				}
+				return true;
+			case R.id.day_view:
+				Log.d(TAG, "day view selected");
+				item.setChecked(true);
+				WeekViewFragment dayViewFragment = new WeekViewFragment();
+				args = new Bundle();
+				args.putInt(WeekViewFragment.NUM_DAYS, 1);
+				dayViewFragment.setArguments(args);
+				swapFragment(dayViewFragment);
 				return true;
 			case R.id.week_view:
-				Log.d(TAG, "week view");
+				Log.d(TAG, "week view selected");
 				item.setChecked(true);
-				swapFragment(new WeekViewFragment());
+				WeekViewFragment weekViewFragment = new WeekViewFragment();
+				args = new Bundle();
+				args.putInt(WeekViewFragment.NUM_DAYS, 5);
+				weekViewFragment.setArguments(args);
+				swapFragment(weekViewFragment);
 				return true;
 			case R.id.month_view:
-				Log.d(TAG, "month view");
+				Log.d(TAG, "month view selected");
 				item.setChecked(true);
 				swapFragment(new MonthViewFragment());
 				return true;
@@ -151,43 +185,56 @@ public class MainActivity extends ActionBarActivity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
+		Log.d(TAG, "onActivityResult");
 		if (requestCode == 1)
 		{
 			if(resultCode == RESULT_OK)
 			{
 				Event event = new Event();
 
-				event.setTitle(data.getStringExtra(CalendarDatabaseHelper.EVENT_TITLE));
-				event.setLocation(data.getStringExtra(CalendarDatabaseHelper.EVENT_LOCATION));
-				event.setDescription(data.getStringExtra(CalendarDatabaseHelper.EVENT_DESCRIPTION));
-				event.setCategory(data.getStringExtra(CalendarDatabaseHelper.EVENT_CATEGORY));
+				event.setId(data.getIntExtra(AddEventActivity.ID, -1));
+				event.setTitle(data.getStringExtra(AddEventActivity.TITLE));
+				event.setLocation(data.getStringExtra(AddEventActivity.LOCATION));
+				event.setDescription(data.getStringExtra(AddEventActivity.DESCRIPTION));
+				event.setCategory(data.getStringExtra(AddEventActivity.CATEGORY));
 
 				Calendar startTime = Calendar.getInstance();
-				startTime.setTimeInMillis(data.getLongExtra(CalendarDatabaseHelper.EVENT_START_TIME, 0));
+				startTime.setTimeInMillis(data.getLongExtra(AddEventActivity.START_TIME, 0));
 				event.setStartTime(startTime);
 
 				Calendar endTime = Calendar.getInstance();
-				endTime.setTimeInMillis(data.getLongExtra(CalendarDatabaseHelper.EVENT_END_TIME, 0));
+				endTime.setTimeInMillis(data.getLongExtra(AddEventActivity.END_TIME, 0));
 				event.setEndTime(endTime);
 
-				event.setCached(_isOffline);
+				event.setCached(true);
 
 				DateFormat df = DateFormat.getDateTimeInstance();
-				Log.d(TAG, "new event start time: " + df.format(event.getStartTime().getTime()));
-				Log.d(TAG, "new event end time: " + df.format(event.getEndTime().getTime()));
 
-				if (!_isOffline)
+				if (event.getId() == -1)
 				{
-					ArrayList<Event> events = _calendarDatabaseHelper.getEvents();
-					events.add(event);
-					_postEventsTask = new PostEventsTask(events);
-					_postEventsTask.execute();
-					showPostProgressDialog();
+					Log.d(TAG, "adding event");
+					_calendarDatabaseHelper.addEvent(event);
+				}
+				else if (data.getBooleanExtra(AddEventActivity.DELETE, false))
+				{
+					Log.d(TAG, "removing event");
+					_calendarDatabaseHelper.deleteEvent(event);
 				}
 				else
 				{
-					_calendarDatabaseHelper.addEvent(event);
-					((EventView) getActiveFragment()).updateEvents();
+					Log.d(TAG, "updating event");
+					_calendarDatabaseHelper.cachedUpdateEvent(event);
+				}
+
+				if (!_isOffline)
+				{
+					_fetchEventsTask = new FetchEventsTask();
+					_fetchEventsTask.execute();
+					showFetchProgressDialog();
+				}
+				else
+				{
+					((EventView) getActiveFragment()).updateEvents(event.getStartTime());
 				}
 			}
 			if (resultCode == RESULT_CANCELED)
@@ -195,6 +242,15 @@ public class MainActivity extends ActionBarActivity
 				Log.d(TAG, "result_canceled");
 				//Write your code if there's no result
 			}
+		}
+	}
+
+	private void setOffline(boolean isOffline)
+	{
+		_isOffline = isOffline;
+		if (_menu != null)
+		{
+			_menu.findItem(R.id.offline).setChecked(isOffline);
 		}
 	}
 
@@ -308,7 +364,7 @@ public class MainActivity extends ActionBarActivity
 					{
 						EditText addressEditText = (EditText) _newAddressDialogView.findViewById(R.id.address);
 						updateSession(addressEditText.getText().toString());
-						_isOffline = false;
+						setOffline(false);
 						_fetchEventsTask = new FetchEventsTask();
 						_fetchEventsTask.execute();
 						showFetchProgressDialog();
@@ -319,7 +375,7 @@ public class MainActivity extends ActionBarActivity
 				{
 					public void onClick(DialogInterface dialog, int id)
 					{
-						_isOffline = true;
+						setOffline(true);
 						Log.d(TAG, "offline");
 					}
 				})
@@ -335,6 +391,7 @@ public class MainActivity extends ActionBarActivity
 
 		public PostEventsTask(ArrayList<Event> events)
 		{
+			Log.d(TAG, "post events task oncreate");
 			_events = new ArrayList<>();
 			_events.addAll(events);
 		}
@@ -342,6 +399,7 @@ public class MainActivity extends ActionBarActivity
 		@Override
 		protected Void doInBackground(Void... params)
 		{
+			Log.d(TAG, "sending events");
 			HttpURLConnection connection;
 			String fullAddress;
 			try
@@ -409,12 +467,17 @@ public class MainActivity extends ActionBarActivity
 			{
 				createNewAddressDialog();
 			}
-//			_calendarDatabaseHelper.addEvent(_event);
-//			printEvents();
-//			((EventView) getActiveFragment()).updateEvents();
+			else
+			{
+				for (Event event : _events)
+				{
+					event.setCached(false);
+					_calendarDatabaseHelper.updateEvent(event);
+				}
+				_calendarDatabaseHelper.removeDeletedEvents();
+				((EventView) getActiveFragment()).updateEvents(Calendar.getInstance());
+			}
 			_postProgressDialog.cancel();
-			_fetchEventsTask = new FetchEventsTask();
-			_fetchEventsTask.execute();
 		}
 	}
 
@@ -430,6 +493,8 @@ public class MainActivity extends ActionBarActivity
 			String fullAddress;
 
 			_calendarDatabaseHelper.deleteNonCachedEvents();
+			Log.d(TAG, "cached events");
+			printEvents();
 			try
 			{
 				// currently using static value for start and end dates and ip
@@ -441,13 +506,14 @@ public class MainActivity extends ActionBarActivity
 				{
 					fullAddress = "http://" + _session.getAddress();
 				}
-				URL url = new URL(fullAddress + ":4567/date_start/123/date_end/234");
+				URL url = new URL(fullAddress + ":4567/date_start/0/date_end/1577836800");
 				connection = (HttpURLConnection) url.openConnection();
 
 				InputStream in = connection.getInputStream();
 
 				JsonFactory jsonFactory = new JsonFactory();
 				JsonParser jp = jsonFactory.createParser(in);
+				Log.d(TAG, "received events");
 				if (jp.nextToken() == JsonToken.START_ARRAY)
 				{
 					while (jp.nextToken() == JsonToken.START_OBJECT)
@@ -457,39 +523,34 @@ public class MainActivity extends ActionBarActivity
 						{
 							fieldName = jp.getCurrentName();
 							jp.nextToken();
-							if (fieldName.equals("title"))
+							switch (fieldName)
 							{
-								event.setTitle(jp.getText());
-							}
-							else if (fieldName.equals("location"))
-							{
-								event.setLocation(jp.getText());
-							}
-							else if (fieldName.equals("description"))
-							{
-								event.setDescription(jp.getText());
-							}
-							else if (fieldName.equals("category"))
-							{
-								event.setCategory(jp.getText());
-							}
-							else if (fieldName.equals("startTime"))
-							{
-								Calendar startTime = Calendar.getInstance();
-								startTime.setTimeInMillis(jp.getLongValue());
-								event.setStartTime(startTime);
-							}
-							else if (fieldName.equals("endTime"))
-							{
-								Calendar endTime = Calendar.getInstance();
-								endTime.setTimeInMillis(jp.getLongValue());
-								event.setEndTime(endTime);
+								case CalendarDatabaseHelper.EVENT_TITLE:
+									event.setTitle(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_LOCATION:
+									event.setLocation(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_DESCRIPTION:
+									event.setDescription(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_CATEGORY:
+									event.setCategory(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_START_TIME:
+									Calendar startTime = Calendar.getInstance();
+									startTime.setTimeInMillis(jp.getLongValue());
+									event.setStartTime(startTime);
+									break;
+								case CalendarDatabaseHelper.EVENT_END_TIME:
+									Calendar endTime = Calendar.getInstance();
+									endTime.setTimeInMillis(jp.getLongValue());
+									event.setEndTime(endTime);
 							}
 						}
-						Log.d(TAG, "title: " + event.getTitle() +
-										", start_date: " + event.getStartTime().toString() +
-										", end_date: " + event.getEndTime().toString()
-						);
+						Log.d(TAG, "added: " + event.getTitle() + ", " + event.getLocation() + ", " + event.getDescription() + ", " + event.getCategory() + ", " + event.getStartTime().getTimeInMillis() + ", " + event.getEndTime().getTimeInMillis());
+
+						event.setCached(false);
 						_calendarDatabaseHelper.addEvent(event);
 					}
 				}
@@ -511,10 +572,17 @@ public class MainActivity extends ActionBarActivity
 			}
 			else if (!_calendarDatabaseHelper.getCachedEvents().isEmpty())
 			{
-				_postEventsTask = new PostEventsTask(_calendarDatabaseHelper.getEvents());
+				Log.d(TAG, "after fetch");
+				printEvents();
+				_postEventsTask = new PostEventsTask(_calendarDatabaseHelper.getNonDeletedEvents());
+				_postEventsTask.execute();
+				showPostProgressDialog();
 			}
-			printEvents();
-			((EventView) getActiveFragment()).updateEvents();
+			else
+			{
+				_calendarDatabaseHelper.removeDeletedEvents();
+			}
+			((EventView) getActiveFragment()).updateEvents(Calendar.getInstance());
 			_fetchProgressDialog.cancel();
 		}
 	}
