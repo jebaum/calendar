@@ -473,6 +473,7 @@ public class MainActivity extends ActionBarActivity
 					event.setCached(false);
 					_calendarDatabaseHelper.updateEvent(event);
 				}
+				_calendarDatabaseHelper.removeDeletedEvents();
 			}
 			_postProgressDialog.cancel();
 		}
@@ -520,34 +521,58 @@ public class MainActivity extends ActionBarActivity
 						{
 							fieldName = jp.getCurrentName();
 							jp.nextToken();
-							if (fieldName.equals("title"))
+							switch (fieldName)
 							{
-								event.setTitle(jp.getText());
+								case CalendarDatabaseHelper.EVENT_TITLE:
+									event.setTitle(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_LOCATION:
+									event.setLocation(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_DESCRIPTION:
+									event.setDescription(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_CATEGORY:
+									event.setCategory(jp.getText());
+									break;
+								case CalendarDatabaseHelper.EVENT_START_TIME:
+									Calendar startTime = Calendar.getInstance();
+									startTime.setTimeInMillis(jp.getLongValue());
+									event.setStartTime(startTime);
+									break;
+								case CalendarDatabaseHelper.EVENT_END_TIME:
+									Calendar endTime = Calendar.getInstance();
+									endTime.setTimeInMillis(jp.getLongValue());
+									event.setEndTime(endTime);
 							}
-							else if (fieldName.equals("location"))
-							{
-								event.setLocation(jp.getText());
-							}
-							else if (fieldName.equals("description"))
-							{
-								event.setDescription(jp.getText());
-							}
-							else if (fieldName.equals("category"))
-							{
-								event.setCategory(jp.getText());
-							}
-							else if (fieldName.equals("startTime"))
-							{
-								Calendar startTime = Calendar.getInstance();
-								startTime.setTimeInMillis(jp.getLongValue());
-								event.setStartTime(startTime);
-							}
-							else if (fieldName.equals("endTime"))
-							{
-								Calendar endTime = Calendar.getInstance();
-								endTime.setTimeInMillis(jp.getLongValue());
-								event.setEndTime(endTime);
-							}
+//							if (fieldName.equals("title"))
+//							{
+//								event.setTitle(jp.getText());
+//							}
+//							else if (fieldName.equals("location"))
+//							{
+//								event.setLocation(jp.getText());
+//							}
+//							else if (fieldName.equals("description"))
+//							{
+//								event.setDescription(jp.getText());
+//							}
+//							else if (fieldName.equals("category"))
+//							{
+//								event.setCategory(jp.getText());
+//							}
+//							else if (fieldName.equals("startTime"))
+//							{
+//								Calendar startTime = Calendar.getInstance();
+//								startTime.setTimeInMillis(jp.getLongValue());
+//								event.setStartTime(startTime);
+//							}
+//							else if (fieldName.equals("endTime"))
+//							{
+//								Calendar endTime = Calendar.getInstance();
+//								endTime.setTimeInMillis(jp.getLongValue());
+//								event.setEndTime(endTime);
+//							}
 						}
 						Log.d(TAG, "title: " + event.getTitle() +
 										", start_date: " + event.getStartTime().toString() +

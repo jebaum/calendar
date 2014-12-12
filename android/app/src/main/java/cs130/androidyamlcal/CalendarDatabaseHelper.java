@@ -28,6 +28,7 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	public static final String EVENT_START_TIME = "startTime";
 	public static final String EVENT_END_TIME = "endTime";
 	public static final String EVENT_IS_CACHED = "isCached";
+	public static final String EVENT_IS_DELETED = "isDeleted";
 	private static final String SESSION = "Session";
 	private static final String SESSION_ADDRESS = "address";
 
@@ -45,14 +46,21 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 					SESSION_ADDRESS +"))"
 		);
 		db.execSQL("CREATE TABLE " + EVENT + "(" +
-				EVENT_ID + " INTEGER PRIMARY KEY, " +
+				EVENT_ID + " INTEGER, " +
 				EVENT_TITLE + " VARCHAR(50), " +
 				EVENT_LOCATION + " VARCHAR(200), " +
 				EVENT_DESCRIPTION + " VARCHAR(500), " +
 				EVENT_CATEGORY + " VARCHAR(50), " +
 				EVENT_START_TIME + " INTEGER, " +
 				EVENT_END_TIME + " INTEGER, " +
-				EVENT_IS_CACHED + " BOOLEAN)"
+				EVENT_IS_CACHED + " BOOLEAN, " +
+				EVENT_IS_DELETED + " BOOLEAN, PRIMARY KEY (" +
+					EVENT_TITLE + "," +
+					EVENT_LOCATION + "," +
+					EVENT_DESCRIPTION + "," +
+					EVENT_CATEGORY + "," +
+					EVENT_START_TIME + "," +
+					EVENT_END_TIME + "))"
 		);
 		ContentValues cv = new ContentValues();
 		cv.put(SESSION_ADDRESS, "");
@@ -76,22 +84,29 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 		cv.put(EVENT_START_TIME, event.getStartTime().getTimeInMillis());
 		cv.put(EVENT_END_TIME, event.getEndTime().getTimeInMillis());
 		cv.put(EVENT_IS_CACHED, event.isCached());
+		cv.put(EVENT_IS_DELETED, true);
 		db.insert(EVENT, null, cv);
 	}
 
 	public void updateEvent(Event event)
 	{
 		SQLiteDatabase db = getWritableDatabase();
-		ContentValues cv = new ContentValues();
-		cv.put(EVENT_ID, event.getId());
-		cv.put(EVENT_TITLE, event.getTitle());
-		cv.put(EVENT_LOCATION, event.getLocation());
-		cv.put(EVENT_DESCRIPTION, event.getDescription());
-		cv.put(EVENT_CATEGORY, event.getCategory());
-		cv.put(EVENT_START_TIME, event.getStartTime().getTimeInMillis());
-		cv.put(EVENT_END_TIME, event.getEndTime().getTimeInMillis());
-		cv.put(EVENT_IS_CACHED, event.isCached());
-		db.update(EVENT, cv, EVENT_ID + "=" + event.getId(), null);
+		ContentValues oldValues = new ContentValues();
+		oldValues.put(EVENT_ID, event.getId());
+		oldValues.put(EVENT_IS_CACHED, event.isCached());
+		oldValues.put(EVENT_IS_DELETED, true);
+		db.update(EVENT, oldValues, EVENT_ID + "=" + event.getId(), null);
+
+		ContentValues newValues = new ContentValues();
+		newValues.put(EVENT_TITLE, event.getTitle());
+		newValues.put(EVENT_LOCATION, event.getLocation());
+		newValues.put(EVENT_DESCRIPTION, event.getDescription());
+		newValues.put(EVENT_CATEGORY, event.getCategory());
+		newValues.put(EVENT_START_TIME, event.getStartTime().getTimeInMillis());
+		newValues.put(EVENT_END_TIME, event.getEndTime().getTimeInMillis());
+		oldValues.put(EVENT_IS_CACHED, event.isCached());
+		oldValues.put(EVENT_IS_DELETED, false);
+		db.insert(EVENT, null, oldValues);
 	}
 
 	public Event getEvent(int id)
@@ -115,7 +130,9 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	public ArrayList<Event> getEvents(String where)
 	{
 		ArrayList<Event> events = new ArrayList<Event>();
-		Cursor cursor = getReadableDatabase().query(EVENT, null, where, null, null, null, null);
+		String whereClause = (where != null ? where + " AND NOT  " + EVENT_IS_DELETED : null);
+		Cursor cursor = getReadableDatabase().query(EVENT, null,
+				whereClause, null, null, null, null);
 
 		while (cursor.moveToNext())
 		{
@@ -126,7 +143,10 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 
 	public int deleteEvent(Event event)
 	{
-		return getWritableDatabase().delete(EVENT, EVENT_ID + "=" + event.getId(), null);
+		ContentValues cv = new ContentValues();
+		cv.put(EVENT_IS_CACHED, true);
+		cv.put(EVENT_IS_DELETED, true);
+		return getWritableDatabase().update(EVENT, cv, EVENT_ID + "=" + event.getId(), null);
 	}
 
 	public int deleteNonCachedEvents()
@@ -137,6 +157,11 @@ public class CalendarDatabaseHelper extends SQLiteOpenHelper
 	public int deleteEvents()
 	{
 		return getWritableDatabase().delete(EVENT, null, null);
+	}
+
+	public int removeDeletedEvents()
+	{
+		return getWritableDatabase().delete(EVENT, EVENT_IS_DELETED, null);
 	}
 
 	public int updateSession(String address)
