@@ -1,3 +1,4 @@
+// Taken from khanacademy: https://github.com/Khan/react-components
 /**
  * A React mixin factory which syncs state with a flux-style datastore. In
  * order to be compatible with this mixin, the datastore must support the
