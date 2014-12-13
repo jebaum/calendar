@@ -19,9 +19,7 @@ Usage
 API
 ===
 #### 1. Get event data via HTTP GET
-- `GET /date_start/UNIXTIMESTAMP/date_end/UNIXTIMESTAMP`
-- Go to `http://localhost:4567/date_start/123/date_end/234` in browser, or
-- `curl 'localhost:4567/date_start/123/date_end/234'`
+- `GET /events`
 - Sample response:
 ```
 [
@@ -44,16 +42,8 @@ API
 ]
 ```
 #### 2. Send event data via HTTP POST
-- POST /
+- `POST /events`
 - Example usage:
 ```
 curl --data '[{"title":"lecture","location":"a room","description":"boring","category":"lame","startTime":1414006000000,"endTime":1414009000000}]' 'localhost:4567'
 ```
-
-#### 3. Update events with HTTP PATCH
-- PATCH /<id>, in memory
-- Work in progress
-
-#### 4. Delete events with HTTP DELETE
-- DELETE /<id>, in memory
-- Work in progress
